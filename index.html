@@ -417,7 +417,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
    ========================================================= */
 /* @core-start – die markierten Abschnitte nutzt auch das Erinnerungs-Skript (push-senden.js) */
 const APP = 'geschenke';                 // Präfix für localStorage, Firebase-App-Name und Hauptknoten in der Datenbank
-const APP_VERSION = '2026-11-02 · 7';    // wird in den Einstellungen angezeigt – bei jeder neuen Version hochzählen
+const APP_VERSION = '2026-11-02 · 8';    // wird in den Einstellungen angezeigt – bei jeder neuen Version hochzählen
 const VAPID_PUBLIC = 'BIdPSh370ZBvqDBzoPnRQJMTcIjat63--7fUNLEffAiwKZ_71G26deCc1hfIEkgNr9jx8--PH3JyNRXK6c4iaUQ';
 const KEY = APP + '.v1';                 // gemeinsame Daten
 const MINEKEY = APP + '.mine';           // private Daten („Meine Geschenke“)
@@ -445,7 +445,6 @@ const thisYear = () => new Date().getFullYear();
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (s, o) => parse(s).toLocaleDateString('de-DE', o);
-const money = n => n.toLocaleString('de-DE', {style:'currency', currency:'EUR', minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: n % 1 ? 2 : 0});
 const safeUrl = u => /^https?:\/\//i.test(u) ? u : 'https://' + u;
 const byName = (a, b) => a.localeCompare(b, 'de', {sensitivity:'base'});
 /* @core-end */
@@ -587,7 +586,6 @@ function dateText(dt){
 }
 const giftList = () => Object.entries(mine.gifts);
 const giftsOf = eid => giftList().filter(([, g]) => g.eid === eid);
-const sumPrice = list => list.reduce((s, [, g]) => s + (+g.price || 0), 0);
 
 /* =========================================================
    Darstellung
@@ -873,8 +871,7 @@ function occHTML(o){
 }
 function giftHTML(id, g, opts = {}){
   const e = mine.entries[g.eid];
-  const meta = [opts.who && e ? `${e.icon} ${e.name}` : '', opts.year && g.year ? g.year : '', g.label, g.price ? money(+g.price) : ''].filter(Boolean).map(esc);
-  if (g.link) meta.push(`<a href="${esc(safeUrl(g.link))}" target="_blank" rel="noopener">Link ↗</a>`);
+  const meta = [opts.who && e ? `${e.icon} ${e.name}` : '', opts.year && g.year ? g.year : '', g.label].filter(Boolean).map(esc);
   return `<div class="gift" data-action="gift" data-id="${id}"><span class="ic" title="${STATUS[g.status].name}">${STATUS[g.status].icon}</span>
     <div class="main"><b>${esc(g.title)}</b>${meta.length ? `<small>${meta.join(' · ')}</small>` : ''}</div></div>`;
 }
@@ -974,8 +971,8 @@ function openEntry(eid){
   const order = id => (e.dates || []).findIndex(dt => dt.id === id);
   const yearHTML = y => {
     const list = gifts.filter(([, g]) => g.year === y).sort((a, b) => order(a[1].dateId) - order(b[1].dateId) || a[1].at - b[1].at);
-    const sum = sumPrice(list), n = list.filter(([, g]) => g.status !== 'idea').length;
-    return `<div class="year-head"><b>${y}</b><small>${n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''}${sum ? ' · ' + money(sum) : ''}</small></div>
+    const n = list.filter(([, g]) => g.status !== 'idea').length;
+    return `<div class="year-head"><b>${y}</b><small>${n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''}</small></div>
       ${list.length ? `<div class="list">${list.map(([id, g]) => giftHTML(id, g)).join('')}</div>` : '<div class="empty small">Noch nichts eingetragen.</div>'}`;
   };
   openModal(`
@@ -1094,12 +1091,7 @@ function openGiftForm(gid, pre = {}){
       <div class="field"><span>Stand</span><div class="opts cols3">
         ${Object.entries(STATUS).map(([k, s]) => opt('status', k, `${s.icon} ${s.name}`, g.status === k, 'stat-' + k)).join('')}
       </div></div>
-      <div class="row2 keep">
-        <label class="field"><span>Jahr</span><input type="number" name="year" min="1950" max="2100" value="${g.year ?? ''}" placeholder="irgendwann"><small id="yearHint"></small></label>
-        <label class="field"><span>Preis in € <em>(optional)</em></span><input type="number" name="price" min="0" step="0.01" value="${g.price ?? ''}"></label>
-      </div>
-      <label class="field"><span>Link <em>(optional)</em></span><input type="url" name="link" value="${esc(g.link)}" placeholder="https://…"></label>
-      <label class="field"><span>Notiz <em>(optional)</em></span><textarea name="note" rows="2" placeholder="Wo gekauft, Größe, Umtausch bis …">${esc(g.note)}</textarea></label>
+      <label class="field"><span>Jahr</span><input type="number" name="year" min="1950" max="2100" value="${g.year ?? ''}" placeholder="irgendwann" style="max-width:160px"><small id="yearHint"></small></label>
       <div id="pastBox"></div>
       <div class="actions stack rev">
         ${old ? '<button type="button" class="btn danger" id="giftDel">Löschen</button>' : ''}
@@ -1155,9 +1147,7 @@ function openGiftForm(gid, pre = {}){
         mine.gifts[id] = {
           title: form.title.value.trim(), eid: e ? form.eid.value : null,
           dateId: e ? (dt?.id || '') : null, label: e ? (dt?.label || 'Sonstiges') : '',
-          status: form.querySelector('[name=status]:checked').value, year,
-          price: form.price.value === '' ? null : Math.round(+form.price.value * 100) / 100,
-          link: form.link.value.trim(), note: form.note.value.trim(), at: old?.at || Date.now(),
+          status: form.querySelector('[name=status]:checked').value, year, at: old?.at || Date.now(),
         };
         saveMine(); render();
         if (e) openEntry(form.eid.value); else hideModal();
