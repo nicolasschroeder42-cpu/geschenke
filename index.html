@@ -50,8 +50,8 @@ input,textarea,select{font:inherit;color:inherit}
 
 .toolbar{max-width:1240px;margin:0 auto;padding:16px 16px 4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .toolbar .seg-switch{margin-left:auto}
-.datenav{display:flex;align-items:center;gap:6px}
-.datenav .lbl{font-size:20px;font-weight:700;letter-spacing:-.3px;min-width:0;padding:0 6px}
+.datenav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.datenav .lbl{font-size:20px;font-weight:700;letter-spacing:-.3px;min-width:0;padding:0 6px;white-space:nowrap}
 .round{width:38px;height:38px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center}
 .round svg{width:18px;height:18px}
 .pill-btn{padding:8px 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:600}
@@ -417,7 +417,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
    ========================================================= */
 /* @core-start – die markierten Abschnitte nutzt auch das Erinnerungs-Skript (push-senden.js) */
 const APP = 'geschenke';                 // Präfix für localStorage, Firebase-App-Name und Hauptknoten in der Datenbank
-const APP_VERSION = '2026-11-02 · 4';    // wird in den Einstellungen angezeigt – bei jeder neuen Version hochzählen
+const APP_VERSION = '2026-11-02 · 7';    // wird in den Einstellungen angezeigt – bei jeder neuen Version hochzählen
 const VAPID_PUBLIC = 'BIdPSh370ZBvqDBzoPnRQJMTcIjat63--7fUNLEffAiwKZ_71G26deCc1hfIEkgNr9jx8--PH3JyNRXK6c4iaUQ';
 const KEY = APP + '.v1';                 // gemeinsame Daten
 const MINEKEY = APP + '.mine';           // private Daten („Meine Geschenke“)
@@ -634,7 +634,7 @@ function yearNav(label, y, min){
     ${min && y <= min ? '' : `<button class="round" data-action="yprev" aria-label="Jahr zurück">${ICON_L}</button>`}
     <button class="round" data-action="ynext" aria-label="Jahr vor">${ICON_R}</button>
     <span class="lbl">${label}</span>
-    ${y === thisYear() ? '' : '<button class="pill-btn" data-action="ynow">Dieses Jahr</button>'}</div>`;
+    ${y === thisYear() ? '' : `<button class="pill-btn" data-action="ynow" title="Zum aktuellen Jahr">↩ ${thisYear()}</button>`}</div>`;
 }
 
 /* ---------- Adventskalender ---------- */
@@ -673,7 +673,7 @@ function buildAdvent(p, td){
 function renderAdvent(v){
   const y = ui.advYear, td = today();
   const filter = `<div class="filter">${['', ...PK].map(k => `<button class="${ui.advFilter === k ? 'active' : ''}" data-action="advfilter" data-f="${k}">${k ? `<span class="dot" style="background:${P(k).color}"></span>${esc(P(k).name)}` : 'Alle'}</button>`).join('')}</div>`;
-  $('#toolbar').innerHTML = yearNav(`🕯️ Adventskalender ${y}`, y, ADVENT_FIRST) + filter;
+  $('#toolbar').innerHTML = yearNav(`🕯️ Advent ${y}`, y, ADVENT_FIRST) + filter;
   const days = Array.from({length: 24}, (_, i) => ({d: i + 1, who: adventWho(y, i + 1), ...adventDoc(y, i + 1)}));
   const pills = PK.map(k => {
     const mineDays = days.filter(x => x.who === k), done = mineDays.filter(x => x.done).length;
@@ -855,10 +855,11 @@ function renderMine(v){
 
 function occStatus(o){
   const gifts = giftsOf(o.eid).filter(([, g]) => g.year === o.year && (g.dateId || '') === o.dt.id);
-  const has = s => gifts.some(([, g]) => g.status === s);
-  if (has('given'))  return '<span class="st-pill st-ok">🎁 verschenkt</span>';
-  if (has('bought')) return `<span class="st-pill st-ok">🛍️ besorgt${gifts.length > 1 ? ' · ' + gifts.length : ''}</span>`;
-  if (has('idea'))   return '<span class="st-pill st-soon">💡 Idee</span>';
+  const count = s => gifts.filter(([, g]) => g.status === s).length;
+  const got = count('given') + count('bought'), ideas = count('idea');   // Anzahl: Ideen zählen nicht als Geschenk
+  if (count('given') && !count('bought')) return `<span class="st-pill st-ok">🎁 ${got} verschenkt</span>`;
+  if (got)   return `<span class="st-pill st-ok">🛍️ ${got} besorgt</span>`;
+  if (ideas) return `<span class="st-pill st-soon">💡 ${ideas} ${ideas > 1 ? 'Ideen' : 'Idee'}</span>`;
   return `<span class="st-pill ${daysBetween(today(), o.date) <= 21 ? 'st-over' : 'st-none'}">noch nichts</span>`;
 }
 function occHTML(o){
@@ -974,8 +975,7 @@ function openEntry(eid){
   const yearHTML = y => {
     const list = gifts.filter(([, g]) => g.year === y).sort((a, b) => order(a[1].dateId) - order(b[1].dateId) || a[1].at - b[1].at);
     const sum = sumPrice(list), n = list.filter(([, g]) => g.status !== 'idea').length;
-    return `<div class="year-head"><b>${y}</b><small>${n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''}${sum ? ' · ' + money(sum) : ''}</small>
-        ${y >= cur ? `<button class="mini" data-action="gift-new" data-eid="${eid}" data-year="${y}">＋ Geschenk</button>` : ''}</div>
+    return `<div class="year-head"><b>${y}</b><small>${n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''}${sum ? ' · ' + money(sum) : ''}</small></div>
       ${list.length ? `<div class="list">${list.map(([id, g]) => giftHTML(id, g)).join('')}</div>` : '<div class="empty small">Noch nichts eingetragen.</div>'}`;
   };
   openModal(`
