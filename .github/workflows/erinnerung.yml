@@ -1,0 +1,28 @@
+name: Erinnerungen
+
+on:
+  schedule:
+    - cron: '50 * * * *'   # stündlich kurz vor der vollen Stunde; das Skript wartet bis :00
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Testnachricht sofort an alle eingeschalteten Geräte senden'
+        type: boolean
+        default: true
+
+jobs:
+  senden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save --no-audit --no-fund web-push@3.6.7
+      - run: node push-senden.js
+        env:
+          TZ: Europe/Berlin
+          FAMILY_CODE: ${{ secrets.FAMILY_CODE }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.test }}
