@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Geschenke</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* Gestaltung nach ../STYLEGUIDE.md (gleiche Basis wie der Familienplaner) */
+:root{
+  --a:#6366f1; --b:#f97316;
+  --bg:#f6f5fb; --card:#ffffff; --card2:#f0eff7; --text:#1d1b2c; --muted:#6e6a85; --line:#e4e2ef;
+  --shadow:0 1px 2px rgba(30,25,70,.05),0 6px 20px rgba(30,25,70,.06);
+  --radius:18px;
+  color-scheme:light;
+}
+/* Dunkel: automatisch nach Geräte-Einstellung oder fest gewählt (data-theme) */
+:root[data-theme=dark]{--bg:#121218;--card:#1d1d26;--card2:#262633;--text:#ecebf5;--muted:#9a97b0;--line:#2e2e3c;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=light]){--bg:#121218;--card:#1d1d26;--card2:#262633;--text:#ecebf5;--muted:#9a97b0;--line:#2e2e3c;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.4;min-height:100vh;padding-bottom:100px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+/* ---------- Kopfbereich ---------- */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1240px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.logo{width:40px;height:40px;border-radius:12px;display:block;flex:none}
+.brand h1{font-size:18px;margin:0;letter-spacing:-.3px}
+.brand small{color:var(--muted);font-size:13px}
+.tabs{display:flex;background:var(--card2);border-radius:14px;padding:4px;gap:2px}
+.tabs button{position:relative;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted)}
+.tabs button svg{width:18px;height:18px}
+.tabs button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.tab-badge{position:absolute;top:1px;right:3px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted)}
+.icon-btn:hover{background:var(--card2)}
+.icon-btn svg{width:20px;height:20px}
+.thought-btn{font-size:21px}
+
+.toolbar{max-width:1240px;margin:0 auto;padding:16px 16px 4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.toolbar .seg-switch{margin-left:auto}
+.datenav{display:flex;align-items:center;gap:6px}
+.datenav .lbl{font-size:20px;font-weight:700;letter-spacing:-.3px;min-width:0;padding:0 6px}
+.round{width:38px;height:38px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center}
+.round svg{width:18px;height:18px}
+.pill-btn{padding:8px 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:600}
+.privacy{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.filter{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.filter button{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);font-size:14px;font-weight:600;color:var(--muted)}
+.filter button.active{color:var(--text);border-color:var(--text)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;background:var(--solid,var(--a))}
+
+main{max-width:1240px;margin:0 auto;padding:12px 16px}
+
+/* ---------- Personenfarben: Element bekommt who-<id> und style="--p:<farbe>" ---------- */
+[class*=who-]{--grad:linear-gradient(135deg,var(--p,var(--a)),var(--p,var(--a)));--solid:var(--p,var(--a));--tint:color-mix(in srgb,var(--p,var(--a)) 11%,var(--card))}
+.who-both{--grad:linear-gradient(135deg,var(--a),var(--b));--solid:var(--a);--tint:linear-gradient(90deg,color-mix(in srgb,var(--a) 11%,var(--card)),color-mix(in srgb,var(--b) 11%,var(--card)))}
+
+/* ---------- Karten / Sektionen ---------- */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.section{margin:22px 0 10px;display:flex;align-items:baseline;gap:10px}
+.section h3{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.section .count{font-size:13px;color:var(--muted)}
+.section.warn h3{color:#dc2626}
+.list{display:flex;flex-direction:column;gap:8px}
+.empty{padding:28px;text-align:center;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1.5px dashed var(--line)}
+.empty .big{font-size:34px;display:block;margin-bottom:6px}
+.empty .btn{margin-top:14px}
+.empty.small{padding:14px;font-size:14px;background:none}
+.cols2{display:grid;grid-template-columns:1fr;gap:0 24px}
+.cols2>div{min-width:0}
+@media (min-width:900px){.cols2{grid-template-columns:3fr 2fr}}
+
+/* ---------- Eintrag ---------- */
+.item{position:relative;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:16px;background:var(--tint,var(--card));overflow:hidden;transition:transform .15s,opacity .2s}
+.item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--grad)}
+.item:active{transform:scale(.99)}
+.check{flex:none;width:34px;height:34px;border-radius:50%;border:2.5px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,var(--grad) border-box;color:transparent;display:grid;place-items:center;transition:all .2s}
+.check svg{width:18px;height:18px}
+.item.done .check{background:var(--grad) border-box;color:#fff}
+.item-body{flex:1;min-width:0;cursor:pointer}
+.item-title{font-weight:650;font-size:16px}
+.item-desc{color:var(--muted);font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:12.5px;color:var(--muted)}
+.item.done .item-title{text-decoration:line-through;opacity:.5}
+.item.done .item-desc,.item.done .item-meta{opacity:.5}
+.avatar{flex:none;width:32px;height:32px;border-radius:50%;background:var(--grad);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;letter-spacing:-.5px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 9px;border-radius:999px;background:var(--card);color:var(--muted);font-weight:600}
+.summary{display:flex;gap:12px;flex-wrap:wrap}
+.summary .card{flex:1;min-width:180px;display:flex;align-items:center;gap:12px;padding:14px 16px}
+.summary .num{font-size:26px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.prow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+.prow .main{flex:1;min-width:0}
+.prow .main small{display:block;color:var(--muted);font-size:13px}
+.prow .ic{font-size:22px}
+.mini{padding:7px 12px;border-radius:10px;font-weight:700;font-size:13.5px;background:var(--card2)}
+.mini.primary{background:var(--text);color:var(--bg)}
+.st-pill{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--st) 16%,var(--card));color:var(--st);white-space:nowrap}
+.st-over{--st:#dc2626}.st-soon{--st:#d97706}.st-ok{--st:#10b981}.st-none{--st:#9ca3af}
+.seg-switch{display:inline-flex;flex-wrap:wrap;background:var(--card2);border-radius:12px;padding:3px}
+.seg-switch button{padding:6px 14px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg-switch button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+/* Geräte-Besitzer: gewählte Person deutlich in ihrer Farbe hervorheben */
+.seg-switch.owner button{padding:9px 18px;font-size:15px}
+.seg-switch.owner button.active{background:var(--grad);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.seg-switch.owner button.active::before{content:"✓ "}
+
+/* ---------- Meine Geschenke: Termine ---------- */
+.occ{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+.occ .main{flex:1;min-width:0}
+.occ .main b{font-size:16px;font-weight:650}
+.occ .main small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.dbox{flex:none;width:48px;height:52px;border-radius:12px;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.dbox b{font-size:20px;font-weight:800}
+.dbox span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.occ.today .dbox{background:linear-gradient(135deg,var(--a),var(--b));color:#fff}
+.occ.today .dbox span{color:#fff}
+.gift{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+.sheet .gift{background:var(--bg);box-shadow:none}
+.gift .ic{font-size:20px;flex:none}
+.gift .main{flex:1;min-width:0}
+.gift .main b{font-weight:650}
+.gift .main small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+.gift a{color:var(--a);font-weight:600;text-decoration:none}
+.year-head{display:flex;align-items:baseline;gap:10px;margin:20px 0 8px}
+.year-head b{font-size:17px;letter-spacing:-.2px}
+.year-head small{color:var(--muted);font-size:13px}
+.year-head .mini{margin-left:auto;align-self:center}
+.ent-head{display:flex;align-items:center;gap:12px;min-width:0}
+.ent-head h2{overflow-wrap:anywhere}
+.ent-icon{font-size:28px;width:52px;height:52px;border-radius:16px;background:var(--card2);display:grid;place-items:center;flex:none}
+.dates{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.date-chip{display:inline-flex;gap:6px;align-items:baseline;padding:6px 12px;border-radius:999px;background:var(--card2);font-size:13.5px;font-weight:600}
+.date-chip small{color:var(--muted);font-weight:500;font-size:12.5px}
+.det-desc{white-space:pre-wrap;background:var(--bg);border-radius:12px;padding:12px 14px;margin:10px 0}
+.drow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;border-radius:12px;background:var(--bg);margin-bottom:8px}
+.drow .ic{font-size:20px;width:28px;text-align:center}
+.field .drow input,.field .drow select{width:auto;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);outline:none;min-width:0}
+.field .drow .lbl{flex:1 1 140px}
+.field .drow .y{width:84px}
+.drow .calc{flex:1 1 140px;color:var(--muted);font-size:14px}
+.drow .icon-btn{width:34px;height:34px;margin-left:auto}
+.chipbtn{padding:7px 12px;border-radius:999px;border:1.5px dashed var(--line);font-size:13.5px;font-weight:600;color:var(--muted)}
+.chipbtn:hover{border-color:var(--text);color:var(--text)}
+.warnmsg{background:color-mix(in srgb,#d97706 14%,var(--card));color:var(--text);border-radius:12px;padding:10px 14px;font-size:13.5px;margin-top:8px}
+.past{display:flex;flex-direction:column;gap:3px;font-size:13.5px}
+.past span{color:var(--muted)}
+
+/* ---------- Kalender ---------- */
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mhead{text-align:center;font-size:13px;font-weight:700;color:var(--muted);padding:4px 0}
+.mcell{background:var(--card);border-radius:12px;min-height:96px;padding:6px;display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);overflow:hidden}
+.mcell.out{opacity:.4}
+.mcell.today{outline:2.5px solid var(--text);outline-offset:-2.5px}
+.mcell .num{font-size:13px;font-weight:700;padding:0 2px 2px}
+.mbar{font-size:11.5px;padding:2px 6px;border-radius:6px;background:color-mix(in srgb,var(--a) 12%,var(--card));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--a);cursor:pointer}
+.mdots{display:none;gap:3px;flex-wrap:wrap;padding:2px}
+@media (max-width:700px){
+  .mcell{min-height:56px}
+  .mbar{display:none}
+  .mdots{display:flex}
+}
+
+/* ---------- Gemeinsam: Personen ---------- */
+.ppl{display:flex;gap:10px;flex-wrap:wrap}
+.pchip{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:650;font-size:14px}
+.pchip small{color:var(--muted);font-weight:600;font-size:13px}
+.pchip.me{outline:2px solid var(--solid)}
+.info-card{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);margin-top:12px;font-weight:600}
+.info-card .txt{flex:1;min-width:200px}
+.info-card small{display:block;font-weight:500;color:var(--muted)}
+.info-card.hl{background:color-mix(in srgb,var(--a) 10%,var(--card))}
+
+/* ---------- Adventskalender ---------- */
+.advent{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:16px}
+.door{position:relative;min-height:112px;padding:14px 12px 10px;border-radius:16px;background:var(--tint);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;gap:1px;transition:opacity .2s,transform .15s}
+.door::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--grad)}
+.door:active{transform:scale(.98)}
+.door b{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.door .dn{font-size:12.5px;font-weight:700;color:var(--solid)}
+.door small{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:auto;padding-top:4px;overflow-wrap:anywhere}
+.door .ok{position:absolute;top:14px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center}
+.door .ok svg{width:14px;height:14px}
+.door.today{outline:2.5px solid var(--text);outline-offset:-2.5px}
+.door.dim{opacity:.28}
+@media (max-width:760px){.advent{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:440px){.advent{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.door{min-height:98px}}
+
+/* ---------- Wichteln ---------- */
+.lots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.lots .card h4{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.lot{display:flex;align-items:center;gap:8px;padding:10px 6px;border-bottom:1px solid var(--line);border-radius:10px}
+.lot:last-child{border-bottom:0}
+.lot.me{background:color-mix(in srgb,var(--a) 9%,var(--card))}
+.lot .arrow{color:var(--muted);font-weight:700}
+.lot .what{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;text-align:right;min-width:0}
+.lot .what.rolling{opacity:.55;filter:blur(.4px)}
+.lot .what.pop{animation:lotpop .35s}
+@keyframes lotpop{40%{transform:scale(1.12)}}
+.sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:inline-block}
+.hrow{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+.hrow>b{font-size:16px;min-width:44px}
+.hchips{display:flex;flex-wrap:wrap;gap:6px}
+.lchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--card2);font-size:12.5px;font-weight:600}
+.lchip .sw{width:12px;height:12px}
+.lchip i{font-style:normal;color:var(--muted)}
+.lotrow{display:grid;grid-template-columns:150px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.lotrow input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);outline:none;min-width:0}
+@media (max-width:520px){.lotrow{grid-template-columns:1fr 1fr}.lotrow>span{grid-column:1/-1}}
+
+/* ---------- Wunschlisten ---------- */
+.wish{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+.wish.own{cursor:pointer}
+.wish .ic{font-size:20px}
+.wish .main{flex:1;min-width:180px}
+.wish .main small{display:block;color:var(--muted);font-size:13px;margin-top:1px;white-space:pre-wrap}
+.wish a{color:var(--a);font-weight:600;text-decoration:none}
+.wish .acts{display:flex;gap:6px;align-items:center;margin-left:auto}
+.wish.taken .main{opacity:.55}
+
+/* ---------- FAB ---------- */
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));z-index:30;height:60px;padding:0 24px 0 20px;border-radius:30px;background:linear-gradient(135deg,var(--a),var(--b));color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 30px color-mix(in srgb,var(--a) 40%,transparent)}
+.fab svg{width:24px;height:24px}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(15,12,35,.45);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .15s}
+.sheet{background:var(--card);border-radius:24px;width:100%;max-width:620px;max-height:calc(100vh - 32px);overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .2s}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{transform:translateY(16px) scale(.98);opacity:0}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.sheet-head h2{margin:0;font-size:21px;letter-spacing:-.3px}
+.field{display:flex;flex-direction:column;gap:7px;margin:14px 0}
+.field>span{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.field em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0}
+.field input[type=text],.field input:not([type]),.field input[type=date],.field input[type=number],.field input[type=url],.field textarea,.field select{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--a)}
+.field small{color:var(--muted);font-size:12.5px}
+.field small:empty{display:none}
+.opts{display:flex;flex-wrap:wrap;gap:7px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt span{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);font-size:14.5px;font-weight:600;cursor:pointer;user-select:none}
+.opt input:checked+span{border-color:var(--text);background:var(--card);box-shadow:var(--shadow)}
+.opt.who input:checked+span{border-color:transparent;background:var(--grad);color:#fff}
+.icons .opt span{width:44px;height:44px;padding:0;justify-content:center;font-size:22px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.actions.start{justify-content:flex-start;margin-top:0}
+.btn{padding:12px 20px;border-radius:12px;font-weight:700;background:var(--card2)}
+.btn.primary{background:var(--text);color:var(--bg)}
+.btn.danger{color:#dc2626;margin-right:auto}
+.hint{background:var(--card2);border-radius:12px;padding:10px 14px;font-size:13.5px;color:var(--muted);margin-top:8px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches .opt span{width:36px;height:36px;padding:0;border-radius:50%;border:3px solid transparent}
+.swatches .opt input:checked+span{border-color:var(--text);box-shadow:inset 0 0 0 3px var(--card)}
+.muted{color:var(--muted);font-size:14px;margin:0 0 10px}
+
+/* ---------- Sync ---------- */
+.sync-ind{position:relative;display:grid;cursor:default}
+.sync-ind:hover{background:none}
+.sdot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;background:#9ca3af}
+.sdot.online{background:#10b981}.sdot.offline{background:#f59e0b}.sdot.connecting{background:#60a5fa}.sdot.error{background:#dc2626}
+.sync-ind .sdot{position:absolute;right:5px;bottom:6px;border:2px solid var(--bg);width:12px;height:12px}
+.syncbox{display:flex;align-items:center;gap:10px;font-weight:600;margin-bottom:10px}
+.qr{display:grid;place-items:center;background:#fff;border-radius:16px;padding:14px;margin:12px auto;width:fit-content}
+.qr svg,.qr img{width:240px;height:240px;display:block}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.banner{max-width:1240px;margin:12px auto 0;padding:10px 16px;background:#fef3c7;color:#92400e;border-radius:12px;font-size:14px}
+
+@media (max-width:1180px){
+  .tabs button span:not(.tab-badge){display:none}
+  .tabs button{padding:9px 12px}
+}
+@media (max-width:640px){
+  /* Handy: oben Logo + Symbole, darunter die Reiter über die volle Breite */
+  .top-inner{gap:8px 2px;padding:10px 12px}
+  .tabs{order:3;width:100%}
+  .tabs button{flex:1;justify-content:center;padding:9px 0}
+}
+@media (max-width:560px){
+  /* Knöpfe in Dialogen: volle Breite, untereinander */
+  .actions.stack{flex-direction:column;align-items:stretch}
+  .actions.stack .btn{width:100%;margin:0!important}
+  .actions.stack.rev{flex-direction:column-reverse}   /* Speichern oben, Löschen unten */
+  .brand small{display:none}
+  .filter{margin-left:0;width:100%}
+  .toolbar .seg-switch{margin-left:0;width:100%}
+  .toolbar .seg-switch button{flex:1}
+  /* Personen-Pillen: drei nebeneinander, kompakt */
+  .ppl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .pchip{flex-direction:column;align-items:flex-start;gap:0;padding:8px 10px;border-radius:14px;border-left:4px solid var(--solid);font-size:13.5px}
+  .pchip .avatar{display:none}
+  .pchip.me{outline:0;background:color-mix(in srgb,var(--solid) 10%,var(--card))}
+  .datenav .lbl{font-size:17px}
+  .fab span{display:none}.fab{padding:0;width:60px;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <img class="logo" src="icon-192.png" alt="">
+      <div><h1>Geschenke</h1><small id="subtitle"></small></div>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+    <button class="icon-btn thought-btn" data-action="idea" title="Idee festhalten" aria-label="Idee festhalten">💭</button>
+    <span class="icon-btn sync-ind" id="syncInd" role="img" title="Abgleich" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H7a5 5 0 1 1 1.1-9.9A6 6 0 0 1 19.6 11 4 4 0 0 1 17.5 19z"/></svg><span class="sdot"></span></span>
+    <button class="icon-btn" data-action="settings" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+<div class="toolbar" id="toolbar"></div>
+<main id="view"></main>
+
+<button class="fab" id="fab" data-action="new" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fabLabel">Neu</span></button>
+<div id="modal" class="modal" hidden><div class="sheet" id="sheet"></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   Konstanten & Hilfsfunktionen
+   ========================================================= */
+/* @core-start – die markierten Abschnitte nutzt auch das Erinnerungs-Skript (push-senden.js) */
+const APP = 'geschenke';                 // Präfix für localStorage, Firebase-App-Name und Hauptknoten in der Datenbank
+const VAPID_PUBLIC = 'BIdPSh370ZBvqDBzoPnRQJMTcIjat63--7fUNLEffAiwKZ_71G26deCc1hfIEkgNr9jx8--PH3JyNRXK6c4iaUQ';
+const KEY = APP + '.v1';                 // gemeinsame Daten
+const MINEKEY = APP + '.mine';           // private Daten („Meine Geschenke“)
+const UIKEY = APP + '.ui';
+const COLORS = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#f59e0b','#10b981','#14b8a6','#0ea5e9','#64748b'];
+const WD = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const MONTHS_SHORT = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'];
+const ICON_CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+const ICON_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return iso(d); };
+const addMonths = (s,n) => { const d = parse(s); return iso(new Date(d.getFullYear(), d.getMonth()+n, 1)); };
+const daysBetween = (a,b) => Math.round((parse(b) - parse(a)) / 864e5);
+const daysInMonth = (y,m) => new Date(y, m+1, 0).getDate();
+const dow = s => (parse(s).getDay() + 6) % 7;            // 0 = Montag
+const monday = s => addDays(s, -dow(s));
+const today = () => iso(new Date());
+const thisYear = () => new Date().getFullYear();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (s, o) => parse(s).toLocaleDateString('de-DE', o);
+const money = n => n.toLocaleString('de-DE', {style:'currency', currency:'EUR', minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: n % 1 ? 2 : 0});
+const safeUrl = u => /^https?:\/\//i.test(u) ? u : 'https://' + u;
+const byName = (a, b) => a.localeCompare(b, 'de', {sensitivity:'base'});
+/* @core-end */
+
+/* =========================================================
+   Zustand & Speicherung
+   Zwei getrennte Bereiche, jeder mit eigenem Abgleich-Kanal:
+     shared – für alle verbundenen Personen (Pfad geschenke/<Familienschlüssel>)
+     priv   – „Meine Geschenke“, nur für die eigenen Geräte (Pfad geschenkePrivat/<persönlicher Schlüssel>)
+   Je Kanal: SINGLES = Einzelobjekte, COLLS = Sammlungen {id: {...}} (ein Cloud-Pfad je Eintrag)
+   ========================================================= */
+const CHANNELS = {
+  shared: {root: APP,            singles: ['settings'], colls: ['advent', 'adventYears', 'wichtel', 'wishes', 'reserved']},
+  priv:   {root: APP + 'Privat', singles: [],           colls: ['entries', 'gifts']},
+};
+
+let storageOK = true;
+try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); } catch(e) { storageOK = false; }
+
+function emptyData(ch){
+  const s = {};
+  ch.singles.forEach(k => s[k] = {});
+  ch.colls.forEach(c => s[c] = {});
+  return s;
+}
+const defaultState = () => Object.assign(emptyData(CHANNELS.shared), {version: 1, setupDone: false});
+const defaultMine = () => emptyData(CHANNELS.priv);
+function loadData(key, def){
+  try { const raw = localStorage.getItem(key); if (raw) return Object.assign(def(), JSON.parse(raw)); } catch(e) {}
+  return def();
+}
+let state = loadData(KEY, defaultState);
+let mine = loadData(MINEKEY, defaultMine);
+let ui = Object.assign({view:'mine', sub:'next', theme:'auto', me:'', advFilter:'', wishTab:''}, (() => { try { return JSON.parse(localStorage.getItem(UIKEY)) || {}; } catch(e) { return {}; } })());
+ui.advYear = ui.wYear = new Date().getFullYear();
+ui.cursor = today();
+
+function storeLocal(key, data){
+  if (!storageOK) return;
+  try { localStorage.setItem(key, JSON.stringify(data)); }
+  catch(e) { showBanner('Speichern fehlgeschlagen. Bitte unter Einstellungen ein Backup exportieren.'); }
+}
+function saveLocal(){ storeLocal(KEY, state); }
+function save(){ saveLocal(); pushSync(CHANNELS.shared); }
+function saveMineLocal(){ storeLocal(MINEKEY, mine); }
+function saveMine(){ saveMineLocal(); pushSync(CHANNELS.priv); updatePrivateReminders(); }
+function saveUI(){ try { localStorage.setItem(UIKEY, JSON.stringify({view:ui.view, sub:ui.sub, theme:ui.theme, me:ui.me, advFilter:ui.advFilter, wishTab:ui.wishTab})); } catch(e) {} }
+
+// Darstellung (pro Gerät): auto | light | dark
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const root = document.documentElement;
+  if (ui.theme === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = ui.theme;
+  document.querySelector('meta[name=theme-color]').content = getComputedStyle(root).getPropertyValue('--bg').trim();
+}
+darkQuery.addEventListener?.('change', applyTheme);
+applyTheme();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+/* =========================================================
+   Meine Geschenke: Termine berechnen
+   Ein Eintrag (Person oder Anlass) hat beliebig viele jährliche Termine:
+   {id, label, icon, rule, m, d, y}  – rule 'fixed' = fester Tag (m/d, y = Geburtsjahr bzw. „seit“),
+   sonst wird das Datum jedes Jahr berechnet.
+   ========================================================= */
+function easter(y){
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19*a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2*e + 2*i - h - k) % 7, m = Math.floor((a + 11*h + 22*l) / 451);
+  return iso(new Date(y, Math.floor((h + l - 7*m + 114) / 31) - 1, ((h + l - 7*m + 114) % 31) + 1));
+}
+const RULES = {
+  fixed:     {name: 'Festes Datum'},
+  muttertag: {name: '2. Sonntag im Mai',            calc: y => iso(new Date(y, 4, 1 + (7 - new Date(y, 4, 1).getDay()) % 7 + 7))},
+  vatertag:  {name: 'Christi Himmelfahrt',          calc: y => addDays(easter(y), 39)},
+  ostern:    {name: 'Ostersonntag, jedes Jahr neu', calc: y => easter(y)},
+};
+const PRESETS = [
+  {label:'Geburtstag',   icon:'🎂', rule:'fixed'},
+  {label:'Weihnachten',  icon:'🎄', rule:'fixed', m:12, d:24},
+  {label:'Muttertag',    icon:'💐', rule:'muttertag'},
+  {label:'Vatertag',     icon:'👔', rule:'vatertag'},
+  {label:'Ostern',       icon:'🐣', rule:'ostern'},
+  {label:'Hochzeitstag', icon:'💍', rule:'fixed'},
+  {label:'Valentinstag', icon:'❤️', rule:'fixed', m:2, d:14},
+  {label:'Nikolaus',     icon:'🎅', rule:'fixed', m:12, d:6},
+  {label:'',             icon:'⭐', rule:'fixed', custom:true, name:'Eigener Termin'},
+];
+const ICONS = ['👤','👩','👨','👵','👴','👧','👦','👶','💑','👪','🐶','📅','🎄','⭐'];
+const STATUS = {
+  idea:   {icon:'💡', name:'Idee'},
+  bought: {icon:'🛍️', name:'Besorgt'},
+  given:  {icon:'🎁', name:'Verschenkt'},
+};
+
+function dateOn(dt, y){
+  if (dt.rule !== 'fixed') return RULES[dt.rule].calc(y);
+  return iso(new Date(y, dt.m - 1, Math.min(dt.d, daysInMonth(y, dt.m - 1))));   // 29.2. → 28.2. in normalen Jahren
+}
+// Alle Termine zwischen from und to (einschließlich), nach Datum sortiert
+function occList(from, to){
+  const out = [];
+  for (const [eid, e] of Object.entries(mine.entries)) for (const dt of e.dates || [])
+    for (let y = +from.slice(0, 4); y <= +to.slice(0, 4); y++){
+      const date = dateOn(dt, y);
+      if (date >= from && date <= to) out.push({eid, e, dt, year: y, date});
+    }
+  return out.sort((a, b) => a.date.localeCompare(b.date) || byName(a.e.name, b.e.name));
+}
+function nextOf(dt){
+  const td = today(), y = thisYear();
+  const date = dateOn(dt, y);
+  return date >= td ? {year: y, date} : {year: y + 1, date: dateOn(dt, y + 1)};
+}
+function nextOcc(e){
+  return (e.dates || []).map(dt => ({dt, ...nextOf(dt)})).sort((a, b) => a.date.localeCompare(b.date))[0] || null;
+}
+// Für welches Jahr trägt man ein Geschenk ein? Liegt der Termin höchstens 30 Tage zurück: dieses Jahr, sonst der nächste.
+function giftYear(dt){
+  if (!dt) return thisYear();
+  return dateOn(dt, thisYear()) >= addDays(today(), -30) ? thisYear() : thisYear() + 1;
+}
+function relDays(date){
+  const n = daysBetween(today(), date);
+  if (n === 0) return 'heute 🎉';
+  if (n === 1) return 'morgen';
+  if (n < 0) return n === -1 ? 'gestern' : `vor ${-n} Tagen`;
+  if (n < 15) return `in ${n} Tagen`;
+  if (n < 60) return `in ${Math.round(n / 7)} Wochen`;
+  return `in ${Math.round(n / 30.4)} Monaten`;
+}
+function ageText(dt, year){
+  if (!dt.y || dt.rule !== 'fixed' || year <= dt.y) return '';
+  return dt.label === 'Geburtstag' ? `wird ${year - dt.y}` : `${year - dt.y}. ${dt.label}`;
+}
+function dateText(dt){
+  return dt.rule === 'fixed' ? `${dt.d}. ${MONTHS_SHORT[dt.m - 1]}${dt.y ? ' ' + dt.y : ''}` : RULES[dt.rule].name;
+}
+const giftList = () => Object.entries(mine.gifts);
+const giftsOf = eid => giftList().filter(([, g]) => g.eid === eid);
+const sumPrice = list => list.reduce((s, [, g]) => s + (+g.price || 0), 0);
+
+/* =========================================================
+   Darstellung
+   ========================================================= */
+// Reiter: [id, Beschriftung, SVG-Pfade]
+const TABS = [
+  ['mine',    'Meine Geschenke', '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/>'],
+  ['advent',  'Advent',          '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 11.5l1.1 2.2 2.4.4-1.7 1.7.4 2.4-2.2-1.2-2.2 1.2.4-2.4-1.7-1.7 2.4-.4z"/>'],
+  ['wichtel', 'Wichteln',        '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/>'],
+  ['wishes',  'Wünsche',         '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'],
+];
+const VIEWS = {mine: renderMine, advent: renderAdvent, wichtel: renderWichtel, wishes: renderWishes};
+const fabLabel = () => ({mine: 'Person / Anlass', wishes: ui.me && wishTab() === ui.me ? 'Wunsch' : ''})[ui.view] || '';
+
+let animUntil = 0, renderLater = null;
+function render(){
+  if (!VIEWS[ui.view]) ui.view = 'mine';
+  // Während die Lose „rollen“, nicht dazwischen neu zeichnen
+  if (ui.view === 'wichtel' && Date.now() < animUntil){ clearTimeout(renderLater); renderLater = setTimeout(render, animUntil - Date.now() + 50); return; }
+  const tabs = $('#tabs');
+  tabs.hidden = TABS.length < 2;
+  tabs.innerHTML = TABS.map(([id, label, icon]) => `<button data-view="${id}" class="${ui.view === id ? 'active' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg><span>${label}</span></button>`).join('');
+  $('#subtitle').textContent = ui.me ? 'Hallo ' + P(ui.me).name : '';
+  $('#fab').hidden = !fabLabel();
+  $('#fabLabel').textContent = fabLabel();
+  VIEWS[ui.view]($('#view'));
+}
+
+/* ---------- Gemeinsam: Personen & Jahresnavigation ---------- */
+/* @core-start */
+const PK = ['a', 'b', 'c'];
+const PEOPLE_DEF = {a: {name:'Nicolas', color:'#6366f1'}, b: {name:'Janina', color:'#ec4899'}, c: {name:'Natascha', color:'#10b981'}};
+const P = k => ({...PEOPLE_DEF[k], ...(state.settings.people?.[k] || {})});
+const pStyle = k => `style="--p:${P(k).color}"`;
+// Kürzel: Anfangsbuchstabe – zwei Buchstaben, wenn ihn noch jemand hat (Nicolas/Natascha → Ni/Na)
+const short = k => { const n = P(k).name.trim() || '?'; return PK.some(o => o !== k && P(o).name.trim()[0]?.toUpperCase() === n[0].toUpperCase()) ? n[0].toUpperCase() + n.slice(1, 2) : n[0].toUpperCase(); };
+const avatar = k => `<span class="avatar who-${k}" ${pStyle(k)} title="${esc(P(k).name)}">${esc(short(k))}</span>`;
+const mod = (a, n) => ((a % n) + n) % n;
+const yKey = y => 'y' + y;   // Jahres-Schlüssel mit Buchstaben, damit Firebase daraus keine Liste macht
+const ownerHTML = () => `<div class="seg-switch owner">${PK.map(k => `<button class="who-${k} ${ui.me === k ? 'active' : ''}" ${pStyle(k)} data-action="me" data-k="${k}">${esc(P(k).name)}</button>`).join('')}</div>`;
+function yearNav(label, y){
+  return `<div class="datenav">
+    <button class="round" data-action="yprev" aria-label="Jahr zurück">${ICON_L}</button>
+    <button class="round" data-action="ynext" aria-label="Jahr vor">${ICON_R}</button>
+    <span class="lbl">${label}</span>
+    ${y === thisYear() ? '' : '<button class="pill-btn" data-action="ynow">Dieses Jahr</button>'}</div>`;
+}
+
+/* ---------- Adventskalender ---------- */
+// Verteilung: Tag 1 → Startperson, Tag 2 → nächste … im Kreis. Die Startperson rückt jedes Jahr eins weiter,
+// ausgehend vom nächstgelegenen Jahr, für das sie festgelegt wurde (ohne Festlegung: 2026 beginnt Person 1).
+function adventStart(y){
+  const ys = Object.keys(state.adventYears).map(k => +k.slice(1)).sort((a, b) => Math.abs(a - y) - Math.abs(b - y));
+  const [base, start] = ys.length ? [ys[0], state.adventYears[yKey(ys[0])].start] : [2026, 'a'];
+  return PK[mod(PK.indexOf(start) + y - base, 3)];
+}
+const adventKey = (y, d) => `${y}-${pad(d)}`;
+const adventDoc = (y, d) => state.advent[adventKey(y, d)] || {};
+const adventPlan = (y, d) => PK[(PK.indexOf(adventStart(y)) + d - 1) % 3];
+const adventWho = (y, d) => adventDoc(y, d).who || adventPlan(y, d);
+
+// Erinnerungen zum Adventskalender für Person p am Tag td (verschickt vom Erinnerungs-Skript, Vorschau in der App):
+// am 15. und 25. November ein Überblick über offene Türchen, ab 30. November am Vorabend des eigenen Türchens
+function buildAdvent(p, td){
+  const out = [], now = parse(td), y = now.getFullYear();
+  if (!p) return out;
+  if (now.getMonth() === 10 && (now.getDate() === 15 || now.getDate() === 25)){
+    const mineDays = Array.from({length: 24}, (_, i) => i + 1).filter(n => adventWho(y, n) === p);
+    const open = mineDays.filter(n => !adventDoc(y, n).done);
+    if (open.length) out.push({title: '🕯️ Adventskalender für Mama', body: `Bei dir noch offen: Türchen ${open.join(', ')} (${open.length} von ${mineDays.length}).`, tag: 'advent', url: './?view=advent'});
+  }
+  const tm = parse(addDays(td, 1)), n = tm.getDate();
+  if (tm.getMonth() === 11 && n <= 24 && adventWho(tm.getFullYear(), n) === p){
+    const doc = adventDoc(tm.getFullYear(), n);
+    out.push({title: `🕯️ Morgen ist Türchen ${n} dran – deins!`, tag: 'advent', url: './?view=advent',
+      body: doc.done ? `${doc.text ? doc.text + ' · ' : ''}Nicht vergessen, es hinzulegen.` : 'Noch nicht als besorgt markiert.'});
+  }
+  return out;
+}
+/* @core-end */
+
+function renderAdvent(v){
+  const y = ui.advYear, td = today();
+  const filter = `<div class="filter">${['', ...PK].map(k => `<button class="${ui.advFilter === k ? 'active' : ''}" data-action="advfilter" data-f="${k}">${k ? `<span class="dot" style="background:${P(k).color}"></span>${esc(P(k).name)}` : 'Alle'}</button>`).join('')}</div>`;
+  $('#toolbar').innerHTML = yearNav(`🕯️ Adventskalender ${y}`, y) + filter;
+  const days = Array.from({length: 24}, (_, i) => ({d: i + 1, who: adventWho(y, i + 1), ...adventDoc(y, i + 1)}));
+  const pills = PK.map(k => {
+    const mineDays = days.filter(x => x.who === k), done = mineDays.filter(x => x.done).length;
+    return `<div class="pchip who-${k} ${ui.me === k ? 'me' : ''}" ${pStyle(k)}>${avatar(k)}${esc(P(k).name)} <small>${done}/${mineDays.length} besorgt</small></div>`;
+  }).join('');
+  // Im Dezember: Was öffnet Mama heute, was ist bei mir noch offen?
+  let banner = '';
+  const dNow = parse(td);
+  if (y === dNow.getFullYear() && dNow.getMonth() === 11 && dNow.getDate() <= 24){
+    const t = days[dNow.getDate() - 1];
+    banner = `<div class="info-card hl"><span style="font-size:24px">🕯️</span><div class="txt">Heute öffnet Mama Türchen ${t.d} – von ${esc(P(t.who).name)}
+      <small>${t.done ? '✓ ' + esc(t.text || 'besorgt') : 'Noch nicht als besorgt markiert'}</small></div></div>`;
+  }
+  if (ui.me && (y > dNow.getFullYear() || (y === dNow.getFullYear() && !(dNow.getMonth() === 11 && dNow.getDate() > 24)))){
+    const open = days.filter(x => x.who === ui.me && !x.done && (y > dNow.getFullYear() || dNow.getMonth() < 11 || x.d >= dNow.getDate()));
+    if (open.length) banner += `<div class="info-card"><span style="font-size:24px">🛍️</span><div class="txt">Bei dir noch offen: Türchen ${open.map(x => x.d).join(', ')}<small>Tippe auf ein Türchen, um einzutragen, was es gibt.</small></div></div>`;
+  }
+  const start = adventStart(y);
+  v.innerHTML = `<div class="ppl">${pills}</div>${banner}
+    <div class="info-card"><div class="txt">Verteilung ${y}: ${esc(P(start).name)} beginnt
+      <small>${PK.map((k, i) => `${esc(P(PK[(PK.indexOf(start) + i) % 3]).name)}: ${i + 1}, ${i + 4}, ${i + 7} …`).join(' · ')}${state.adventYears[yKey(y)] ? '' : ' · rückt jedes Jahr automatisch weiter'}</small></div>
+      <button class="mini" data-action="adv-start">Ändern</button></div>
+    <div class="advent">${days.map(x => `<div class="door who-${x.who} ${x.done ? 'done' : ''} ${`${y}-12-${pad(x.d)}` === td ? 'today' : ''} ${ui.advFilter && ui.advFilter !== x.who ? 'dim' : ''}" ${pStyle(x.who)} data-action="door" data-d="${x.d}">
+        <b>${x.d}</b><span class="dn">${esc(P(x.who).name)}${x.who !== adventPlan(y, x.d) ? ' ⇄' : ''}</span>
+        ${x.done ? `<span class="ok" title="besorgt">${ICON_CHECK}</span>` : ''}
+        ${x.text ? `<small>${esc(x.text)}</small>` : ''}</div>`).join('')}</div>`;
+}
+
+/* ---------- Wichteln ---------- */
+// Jedes Jahr zwei Runden im Kreis – einmal in jede Richtung. So schenkt jede Person zweimal und bekommt zweimal.
+// Schlüssel eines Loses: Schenkende + Beschenkte, z. B. 'ab' = Person a beschenkt Person b.
+const ROUNDS = [{name: 'Runde 1', lots: ['ab', 'bc', 'ca']}, {name: 'Runde 2', lots: ['ac', 'cb', 'ba']}];
+const LOTS = ROUNDS.flatMap(r => r.lots);
+const WCOLORS = {Rot:'#ef4444', Blau:'#3b82f6', Grün:'#22c55e', Gelb:'#facc15', Orange:'#f97316', Lila:'#a855f7', Rosa:'#f9a8d4', Pink:'#ec4899',
+  Türkis:'#14b8a6', Braun:'#92400e', Schwarz:'#111827', Weiß:'#ffffff', Grau:'#9ca3af', Gold:'#d4a017', Silber:'#c0c0c0', Beige:'#e7d7b9',
+  Bunt:'conic-gradient(#ef4444,#facc15,#22c55e,#3b82f6,#a855f7,#ef4444)'};
+const DEF_CATS = ['Küche', 'Bad', 'Garten', 'Wohnen', 'Freizeit', 'Lesen', 'Wellness', 'Kleidung', 'Essen & Trinken', 'Technik', 'Sport', 'Reisen', 'Basteln', 'Büro'];
+const wColors = () => state.settings.wColors?.length ? state.settings.wColors : Object.keys(WCOLORS).filter(c => c !== 'Bunt');
+const wCats = () => state.settings.wCats?.length ? state.settings.wCats : DEF_CATS;
+const swatch = c => `<span class="sw" style="background:${WCOLORS[c] || 'var(--card2)'}"></span>`;
+const lotWhat = l => `${swatch(l.color)}${esc(l.color)} · ${esc(l.cat)}`;
+const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// Zufällige Farben und Kategorien – möglichst alle verschieden, ohne Kombinationen aus früheren Jahren
+// und ohne dieselbe Farbe/Kategorie wie im Vorjahr für dasselbe Paar
+function drawLots(y){
+  const colors = wColors(), cats = wCats();
+  const used = new Set(Object.entries(state.wichtel).filter(([k]) => k !== yKey(y)).flatMap(([, w]) => Object.values(w.lots || {}).map(l => l.color + '|' + l.cat)));
+  const prev = state.wichtel[yKey(y - 1)]?.lots || {};
+  let best = null, bestScore = Infinity;
+  for (let t = 0; t < 400 && bestScore > 0; t++){
+    const cs = shuffle(colors), ks = shuffle(cats), lots = {};
+    let score = 0;
+    LOTS.forEach((k, i) => {
+      const l = {color: cs[i % cs.length], cat: ks[i % ks.length]};
+      if (used.has(l.color + '|' + l.cat)) score += 10;
+      if (prev[k] && (prev[k].color === l.color || prev[k].cat === l.cat)) score += 1;
+      lots[k] = l;
+    });
+    if (score < bestScore){ best = lots; bestScore = score; }
+  }
+  return best;
+}
+function doDraw(){
+  const y = ui.wYear, old = state.wichtel[yKey(y)];
+  if (old && !confirm(`Für ${y} neu auslosen? Das bisherige Ergebnis wird für alle ersetzt.`)) return;
+  state.wichtel[yKey(y)] = {lots: drawLots(y), drawnAt: Date.now(), by: ui.me || null};
+  save(); render();
+}
+// Rollende Anzeige beim Auslosen – auch auf den Geräten der anderen, wenn sie die App gerade offen haben
+function animateLots(root){
+  const els = [...root.querySelectorAll('.lot .what')], colors = wColors(), cats = wCats();
+  animUntil = Date.now() + 900 + els.length * 350 + 100;
+  els.forEach((el, i) => {
+    const final = el.innerHTML, stop = Date.now() + 900 + i * 350;
+    el.classList.add('rolling');
+    const t = setInterval(() => {
+      if (Date.now() < stop){ el.innerHTML = lotWhat({color: colors[rnd(colors.length)], cat: cats[rnd(cats.length)]}); return; }
+      clearInterval(t); el.innerHTML = final; el.classList.remove('rolling'); el.classList.add('pop');
+    }, 70);
+  });
+}
+
+function renderWichtel(v){
+  const y = ui.wYear, w = state.wichtel[yKey(y)];
+  $('#toolbar').innerHTML = yearNav(`🎲 Wichteln ${y}`, y) + `<button class="pill-btn" data-action="pools" style="margin-left:auto">⚙️ Farben & Kategorien</button>`;
+  const lotRow = k => `<div class="lot ${k[0] === ui.me ? 'me' : ''}">${avatar(k[0])}<span class="arrow">→</span>${avatar(k[1])}
+      <span>${esc(P(k[1]).name)}</span><span class="what">${lotWhat(w.lots[k] || {color:'?', cat:'?'})}</span></div>`;
+  let html = '';
+  if (!w){
+    html = `<div class="empty"><span class="big">🎲</span>Für ${y} ist noch nichts gelost.<br>
+      <button class="btn primary" data-action="draw">🎲 Jetzt auslosen</button> <button class="btn" data-action="lots-edit">✏️ Von Hand eintragen</button></div>`;
+  } else {
+    if (ui.me){
+      const give = LOTS.filter(k => k[0] === ui.me), get = LOTS.filter(k => k[1] === ui.me);
+      html += `<div class="info-card hl" style="margin-top:0"><span style="font-size:24px">🎁</span><div class="txt">Du beschenkst ${give.map(k => `${esc(P(k[1]).name)}: ${esc(w.lots[k]?.color)} · ${esc(w.lots[k]?.cat)}`).join(' und ')}
+        <small>Du bekommst: ${get.map(k => `${esc(w.lots[k]?.color)} · ${esc(w.lots[k]?.cat)} von ${esc(P(k[0]).name)}`).join(', ')}</small></div></div><div style="height:12px"></div>`;
+    }
+    html += `<div class="lots">${ROUNDS.map(r => `<div class="card"><h4>${r.name}</h4>${r.lots.map(lotRow).join('')}</div>`).join('')}</div>
+      <div class="actions start" style="margin-top:12px">
+        <span class="muted" style="margin:0 auto 0 0;align-self:center">${w.drawnAt ? `Gelost am ${esc(new Date(w.drawnAt).toLocaleDateString('de-DE'))}${w.by ? ' von ' + esc(P(w.by).name) : ''}` : 'Von Hand eingetragen'}</span>
+        <button class="mini" data-action="lots-edit">✏️ Bearbeiten</button><button class="mini" data-action="draw">🎲 Neu auslosen</button></div>`;
+  }
+  const years = Object.keys(state.wichtel).map(k => +k.slice(1)).filter(x => x !== y).sort((a, b) => b - a);
+  html += `<div class="section"><h3>Alle Jahre</h3><span class="count">${years.length ? 'zum Öffnen antippen' : ''}</span></div>` + (years.length
+    ? `<div class="list">${years.map(x => `<div class="hrow" data-action="wyear" data-y="${x}"><b>${x}</b><div class="hchips">${LOTS.map(k => { const l = state.wichtel[yKey(x)].lots?.[k]; return l ? `<span class="lchip"><i>${esc(short(k[0]))}→${esc(short(k[1]))}</i>${swatch(l.color)}${esc(l.color)} · ${esc(l.cat)}</span>` : ''; }).join('')}</div></div>`).join('')}</div>`
+    : '<div class="empty small">Frühere Jahre kannst du über ‹ › auswählen und dort von Hand eintragen.</div>');
+  v.innerHTML = html;
+  // Neues Ergebnis (von hier oder einem anderen Gerät) einmal rollend aufdecken
+  if (w?.drawnAt && Date.now() - w.drawnAt < 5 * 60e3){
+    const seen = lsGet(APP + '.seenDraw', {});
+    if (seen[y] !== w.drawnAt){ seen[y] = w.drawnAt; lsSet(APP + '.seenDraw', seen); animateLots(v); }
+  }
+}
+
+/* ---------- Wunschlisten ---------- */
+const wishTab = () => PK.includes(ui.wishTab) ? ui.wishTab : ui.me;
+function renderWishes(v){
+  if (!ui.me){
+    $('#toolbar').innerHTML = '<div class="datenav"><span class="lbl">⭐ Wunschlisten</span></div>';
+    v.innerHTML = `<div class="empty"><span class="big">⭐</span>Wer bist du? Dann weiß die App, welche Reservierungen sie vor dir geheim halten muss.<br><br>${ownerHTML()}</div>`;
+    return;
+  }
+  const tab = wishTab();
+  $('#toolbar').innerHTML = `<div class="datenav"><span class="lbl">⭐ Wunschlisten</span></div>
+    <div class="seg-switch">${[ui.me, ...PK.filter(k => k !== ui.me)].map(k => `<button class="${tab === k ? 'active' : ''}" data-action="wishtab" data-k="${k}">${k === ui.me ? 'Meine Wünsche' : esc(P(k).name)}</button>`).join('')}</div>`;
+  const list = Object.entries(state.wishes).filter(([, w]) => w.owner === tab).sort((a, b) => (b[1].fav ? 1 : 0) - (a[1].fav ? 1 : 0) || a[1].at - b[1].at);
+  const link = w => w.link ? `${w.note ? ' · ' : ''}<a href="${esc(safeUrl(w.link))}" target="_blank" rel="noopener">Link ↗</a>` : '';
+  if (tab === ui.me){
+    v.innerHTML = `<div class="hint" style="margin:0 0 12px">🤫 Ob jemand etwas reserviert hat, siehst du nicht – die Überraschung bleibt.</div>`
+      + (list.length ? `<div class="list">${list.map(([id, w]) => `<div class="wish own" data-action="wish" data-id="${id}"><span class="ic">${w.fav ? '⭐' : '🎁'}</span>
+          <div class="main"><b>${esc(w.title)}</b>${w.note || w.link ? `<small>${esc(w.note || '')}${link(w)}</small>` : ''}</div></div>`).join('')}</div>`
+        : `<div class="empty"><span class="big">⭐</span>Trag ein, worüber du dich freuen würdest – für Geburtstag, Weihnachten oder einfach so.<br><button class="btn primary" data-action="new">＋ Wunsch eintragen</button></div>`);
+    return;
+  }
+  v.innerHTML = list.length ? `<div class="list">${list.map(([id, w]) => {
+      const r = state.reserved[id];
+      const acts = !r ? `<button class="mini primary" data-action="reserve" data-id="${id}">Ich besorge das</button>`
+        : r.by === ui.me ? `<span class="st-pill st-ok">✓ besorgst du</span><button class="mini" data-action="unreserve" data-id="${id}">Freigeben</button>`
+        : `<span class="st-pill st-none">🔒 ${esc(P(r.by).name)} besorgt das</span>`;
+      return `<div class="wish ${r && r.by !== ui.me ? 'taken' : ''}"><span class="ic">${w.fav ? '⭐' : '🎁'}</span>
+        <div class="main"><b>${esc(w.title)}</b>${w.note || w.link ? `<small>${esc(w.note || '')}${link(w)}</small>` : ''}</div><div class="acts">${acts}</div></div>`;
+    }).join('')}</div><p class="muted" style="margin-top:12px">🤫 ${esc(P(tab).name)} sieht nicht, wer was besorgt.</p>`
+    : `<div class="empty"><span class="big">⭐</span>${esc(P(tab).name)} hat noch keine Wünsche eingetragen.</div>`;
+}
+
+/* ---------- Meine Geschenke ---------- */
+const SUBS = [['next', 'Als Nächstes'], ['cal', 'Kalender'], ['all', 'Alle']];
+function renderMine(v){
+  if (!SUBS.some(s => s[0] === ui.sub)) ui.sub = 'next';
+  const seg = `<div class="seg-switch">${SUBS.map(([k, l]) => `<button class="${ui.sub === k ? 'active' : ''}" data-action="sub" data-s="${k}">${l}</button>`).join('')}</div>`;
+  let nav = `<div class="datenav"><span class="lbl">Meine Geschenke</span><span class="privacy" title="Diesen Bereich sehen nur deine eigenen Geräte">🔒 nur für dich</span></div>`;
+  if (ui.sub === 'cal'){
+    const isNow = ui.cursor.slice(0, 7) === today().slice(0, 7);
+    nav = `<div class="datenav">
+      <button class="round" data-action="prev" aria-label="zurück">${ICON_L}</button>
+      <button class="round" data-action="next" aria-label="vor">${ICON_R}</button>
+      <span class="lbl">${esc(fmt(ui.cursor, {month:'long', year:'numeric'}))}</span>
+      ${isNow ? '' : '<button class="pill-btn" data-action="now">Heute</button>'}</div>`;
+  }
+  $('#toolbar').innerHTML = nav + seg;
+
+  if (!Object.keys(mine.entries).length && !giftList().length){
+    v.innerHTML = `<div class="empty"><span class="big">🎁</span>Lege Personen und Anlässe an, die du beschenkst – mit Geburtstag, Weihnachten, Muttertag …<br>
+      Alles hier sehen nur deine eigenen Geräte.<br><button class="btn primary" data-action="new">＋ Person / Anlass anlegen</button></div>`;
+    return;
+  }
+  ({next: renderNext, cal: renderCal, all: renderAll})[ui.sub](v);
+}
+
+function occStatus(o){
+  const gifts = giftsOf(o.eid).filter(([, g]) => g.year === o.year && (g.dateId || '') === o.dt.id);
+  const has = s => gifts.some(([, g]) => g.status === s);
+  if (has('given'))  return '<span class="st-pill st-ok">🎁 verschenkt</span>';
+  if (has('bought')) return `<span class="st-pill st-ok">🛍️ besorgt${gifts.length > 1 ? ' · ' + gifts.length : ''}</span>`;
+  if (has('idea'))   return '<span class="st-pill st-soon">💡 Idee</span>';
+  return `<span class="st-pill ${daysBetween(today(), o.date) <= 21 ? 'st-over' : 'st-none'}">noch nichts</span>`;
+}
+function occHTML(o){
+  const d = parse(o.date);
+  const age = ageText(o.dt, o.year);   // „40. Hochzeitstag“ enthält die Bezeichnung schon
+  const info = [age.endsWith(o.dt.label) ? '' : o.dt.label, age, relDays(o.date)].filter(Boolean).join(' · ');
+  return `<div class="occ ${o.date === today() ? 'today' : ''}" data-action="entry" data-id="${o.eid}">
+    <div class="dbox"><b>${d.getDate()}</b><span>${WD[dow(o.date)]}</span></div>
+    <div class="main"><b>${o.dt.icon} ${esc(o.e.name)}</b><small>${esc(info)}</small></div>
+    ${occStatus(o)}</div>`;
+}
+function giftHTML(id, g, opts = {}){
+  const e = mine.entries[g.eid];
+  const meta = [opts.who && e ? `${e.icon} ${e.name}` : '', opts.year && g.year ? g.year : '', g.label, g.price ? money(+g.price) : ''].filter(Boolean).map(esc);
+  if (g.link) meta.push(`<a href="${esc(safeUrl(g.link))}" target="_blank" rel="noopener">Link ↗</a>`);
+  return `<div class="gift" data-action="gift" data-id="${id}"><span class="ic" title="${STATUS[g.status].name}">${STATUS[g.status].icon}</span>
+    <div class="main"><b>${esc(g.title)}</b>${meta.length ? `<small>${meta.join(' · ')}</small>` : ''}</div></div>`;
+}
+
+function renderNext(v){
+  const td = today();
+  const loose = giftList().filter(([, g]) => !g.eid);
+  const occ = occList(td, addDays(td, 364));
+  const months = [];
+  occ.forEach(o => { const k = o.date.slice(0, 7); if (!months.length || months[months.length - 1].k !== k) months.push({k, list: []}); months[months.length - 1].list.push(o); });
+  v.innerHTML = (loose.length ? `<div class="section"><h3>💡 Ideen ohne Zuordnung</h3><span class="count">${loose.length}</span></div>
+      <div class="list">${loose.map(([id, g]) => giftHTML(id, g)).join('')}</div>` : '')
+    + (months.length ? months.map(m => `<div class="section"><h3>${esc(fmt(m.k + '-01', {month:'long', year:'numeric'}))}</h3></div>
+      <div class="list">${m.list.map(occHTML).join('')}</div>`).join('')
+      : `<div class="section"><h3>Als Nächstes</h3></div><div class="empty">Noch keine Termine eingetragen. Öffne eine Person unter „Alle“ und füge z. B. den Geburtstag hinzu.</div>`);
+}
+
+function renderCal(v){
+  const first = ui.cursor.slice(0, 8) + '01', y = +first.slice(0, 4), m = +first.slice(5, 7) - 1;
+  const last = iso(new Date(y, m, daysInMonth(y, m)));
+  const start = monday(first), end = addDays(monday(last), 6), td = today();
+  const occ = occList(start, end), byDay = {};
+  occ.forEach(o => (byDay[o.date] ||= []).push(o));
+  let cells = '';
+  for (let d = start; d <= end; d = addDays(d, 1)){
+    const list = byDay[d] || [];
+    cells += `<div class="mcell ${d.slice(5, 7) !== first.slice(5, 7) ? 'out' : ''} ${d === td ? 'today' : ''}">
+      <div class="num">${parse(d).getDate()}</div>
+      ${list.map(o => `<div class="mbar" data-action="entry" data-id="${o.eid}" title="${esc(o.e.name + ' · ' + o.dt.label)}">${o.dt.icon} ${esc(o.e.name)}</div>`).join('')}
+      <div class="mdots">${list.map(() => '<span class="dot"></span>').join('')}</div></div>`;
+  }
+  const inMonth = occ.filter(o => o.date >= first && o.date <= last);
+  v.innerHTML = `<div class="month">${WD.map(w => `<div class="mhead">${w}</div>`).join('')}${cells}</div>
+    <div class="section"><h3>Termine im ${esc(MONTHS[m])}</h3><span class="count">${inMonth.length}</span></div>
+    ${inMonth.length ? `<div class="list">${inMonth.map(occHTML).join('')}</div>` : '<div class="empty small">Keine Termine in diesem Monat.</div>'}`;
+}
+
+function renderAll(v){
+  const rows = kind => Object.entries(mine.entries).filter(([, e]) => e.kind === kind).sort((a, b) => byName(a[1].name, b[1].name)).map(([eid, e]) => {
+    const nx = nextOcc(e), n = giftsOf(eid).filter(([, g]) => g.status !== 'idea').length;
+    const info = [nx ? `${nx.dt.icon} ${nx.dt.label} ${relDays(nx.date)}` : 'kein Termin', n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''].filter(Boolean).join(' · ');
+    return `<div class="prow" data-action="entry" data-id="${eid}"><span class="ic">${e.icon}</span><div class="main"><b>${esc(e.name)}</b><small>${esc(info)}</small></div></div>`;
+  });
+  const people = rows('person'), events = rows('event');
+  v.innerHTML = (people.length ? `<div class="section"><h3>👤 Personen</h3><span class="count">${people.length}</span></div><div class="list">${people.join('')}</div>` : '')
+    + (events.length ? `<div class="section"><h3>📅 Anlässe</h3><span class="count">${events.length}</span></div><div class="list">${events.join('')}</div>` : '');
+}
+
+/* =========================================================
+   Dialoge
+   ========================================================= */
+// Die Zurück-Taste (Android) schließt einen offenen Dialog, statt die App zu verlassen
+let modalHist = false, backPending = false;
+function pushModalHist(){
+  if (modalHist || backPending || !state.setupDone) return;
+  history.pushState({modal: 1}, '');
+  modalHist = true;
+}
+function openModal(html, onMount){
+  $('#sheet').innerHTML = html;
+  $('#modal').hidden = false;
+  $('#sheet').scrollTop = 0;
+  pushModalHist();
+  onMount && onMount($('#sheet'));
+}
+function hideModal(){
+  $('#modal').hidden = true; $('#sheet').innerHTML = '';
+  if (modalHist){ modalHist = false; backPending = true; history.back(); }
+}
+function closeModal(){
+  if (!state.setupDone) return;
+  hideModal();
+}
+window.addEventListener('popstate', () => {
+  if (backPending){
+    backPending = false;
+    if (!$('#modal').hidden) pushModalHist();   // inzwischen wurde schon das nächste Fenster geöffnet
+    return;
+  }
+  if (!modalHist) return;
+  modalHist = false;
+  if (!state.setupDone){ pushModalHist(); return; }   // Ersteinrichtung lässt sich nicht wegklicken
+  $('#modal').hidden = true; $('#sheet').innerHTML = '';
+});
+
+function opt(name, value, label, checked, cls = '', type = 'radio'){
+  return `<label class="opt ${cls}"><input type="${type}" name="${name}" value="${esc(value)}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
+}
+const focusFine = el => { if (el && matchMedia('(pointer: fine)').matches) setTimeout(() => el.focus(), 50); };
+
+/* ---------- Person / Anlass: Ansicht mit Zeitleiste ---------- */
+function openEntry(eid){
+  const e = mine.entries[eid];
+  if (!e){ hideModal(); return; }
+  const gifts = giftsOf(eid);
+  const loose = gifts.filter(([, g]) => g.year == null);
+  const nx = nextOcc(e), cur = nx ? giftYear(nx.dt) : thisYear();
+  const years = [...new Set([cur, ...gifts.filter(([, g]) => g.year != null).map(([, g]) => g.year)])].sort((a, b) => b - a);
+  const order = id => (e.dates || []).findIndex(dt => dt.id === id);
+  const yearHTML = y => {
+    const list = gifts.filter(([, g]) => g.year === y).sort((a, b) => order(a[1].dateId) - order(b[1].dateId) || a[1].at - b[1].at);
+    const sum = sumPrice(list), n = list.filter(([, g]) => g.status !== 'idea').length;
+    return `<div class="year-head"><b>${y}</b><small>${n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''}${sum ? ' · ' + money(sum) : ''}</small>
+        ${y >= cur ? `<button class="mini" data-action="gift-new" data-eid="${eid}" data-year="${y}">＋ Geschenk</button>` : ''}</div>
+      ${list.length ? `<div class="list">${list.map(([id, g]) => giftHTML(id, g)).join('')}</div>` : '<div class="empty small">Noch nichts eingetragen.</div>'}`;
+  };
+  openModal(`
+    <div class="sheet-head"><div class="ent-head"><span class="ent-icon">${e.icon}</span><h2>${esc(e.name)}</h2></div><button class="icon-btn" data-action="close">✕</button></div>
+    <div class="dates">${(e.dates || []).map(dt => { const n = nextOf(dt); return `<span class="date-chip">${dt.icon} ${esc(dt.label)} <small>${esc(dateText(dt))} · ${esc([ageText(dt, n.year), relDays(n.date)].filter(Boolean).join(', '))}</small></span>`; }).join('') || '<span class="muted">Kein Termin hinterlegt</span>'}</div>
+    ${e.note ? `<div class="det-desc">${esc(e.note)}</div>` : ''}
+    <div class="actions start">
+      <button class="btn primary" data-action="gift-new" data-eid="${eid}">＋ Geschenk</button>
+      <button class="btn" data-action="idea" data-eid="${eid}">💡 Idee</button>
+      <button class="btn" data-action="entry-edit" data-id="${eid}">✏️ Bearbeiten</button>
+    </div>
+    ${loose.length ? `<div class="section"><h3>💡 Ideen</h3><span class="count">${loose.length}</span></div><div class="list">${loose.map(([id, g]) => giftHTML(id, g)).join('')}</div>` : ''}
+    ${years.map(yearHTML).join('')}`);
+}
+
+/* ---------- Person / Anlass anlegen / bearbeiten ---------- */
+function openEntryForm(eid){
+  const e = eid ? mine.entries[eid] : null;
+  const draft = e ? JSON.parse(JSON.stringify(e)) : {name:'', kind:'person', icon:'👤', dates:[], note:''};
+  draft.dates = draft.dates || [];
+  const icons = ICONS.includes(draft.icon) ? ICONS : [draft.icon, ...ICONS];
+  const dayOpts = sel => Array.from({length:31}, (_, i) => `<option value="${i+1}" ${sel === i+1 ? 'selected' : ''}>${i+1}.</option>`).join('');
+  const monOpts = sel => MONTHS.map((n, i) => `<option value="${i+1}" ${sel === i+1 ? 'selected' : ''}>${n}</option>`).join('');
+  const datesHTML = () => draft.dates.length ? draft.dates.map((dt, i) => `<div class="drow" data-i="${i}">
+      <span class="ic">${dt.icon}</span>
+      <input class="lbl" value="${esc(dt.label)}" maxlength="30" placeholder="Bezeichnung" aria-label="Bezeichnung">
+      ${dt.rule === 'fixed'
+        ? `<select class="d" aria-label="Tag">${dayOpts(dt.d)}</select><select class="m" aria-label="Monat">${monOpts(dt.m)}</select>
+           <input class="y" type="number" min="1900" max="2100" placeholder="Jahr" value="${dt.y || ''}" title="Geburtsjahr bzw. „seit“ – optional, für das Alter">`
+        : `<span class="calc">📆 ${RULES[dt.rule].name}</span>`}
+      <button type="button" class="icon-btn" data-rm="${i}" aria-label="Termin entfernen">✕</button></div>`).join('')
+    : '<p class="muted">Noch kein Termin – unten auswählen.</p>';
+
+  openModal(`
+    <div class="sheet-head"><h2>${e ? 'Bearbeiten' : 'Person / Anlass anlegen'}</h2><button class="icon-btn" data-action="${e ? 'entry' : 'close'}" data-id="${eid || ''}">✕</button></div>
+    <form id="entryForm" autocomplete="off">
+      <div class="field"><span>Art</span><div class="opts">
+        ${opt('kind', 'person', '👤 Person', draft.kind === 'person')}${opt('kind', 'event', '📅 Anlass', draft.kind === 'event')}
+      </div></div>
+      <label class="field"><span>Name</span><input name="name" maxlength="40" value="${esc(draft.name)}" placeholder="z. B. Mama, Oma Inge, Silvester-Party" required></label>
+      <div class="field"><span>Symbol</span><div class="opts icons">${icons.map(i => opt('icon', i, i, draft.icon === i)).join('')}</div></div>
+      <div class="field"><span>Jährliche Termine</span>
+        <div id="dates">${datesHTML()}</div>
+        <div class="opts">${PRESETS.map((p, i) => `<button type="button" class="chipbtn" data-preset="${i}">＋ ${p.icon} ${p.name || p.label}</button>`).join('')}</div>
+        <small>Muttertag, Vatertag und Ostern berechnet die App jedes Jahr selbst. Mit Jahr (z. B. Geburtsjahr) zeigt sie das Alter an.</small>
+      </div>
+      <label class="field"><span>Notiz <em>(optional)</em></span><textarea name="note" rows="3" placeholder="Größen, Hobbys, Wünsche, „hat schon“ …">${esc(draft.note)}</textarea></label>
+      <div class="actions stack rev">
+        ${e ? '<button type="button" class="btn danger" id="entryDel">Löschen</button>' : ''}
+        <button type="button" class="btn" data-action="${e ? 'entry' : 'close'}" data-id="${eid || ''}">Abbrechen</button>
+        <button type="submit" class="btn primary">Speichern</button>
+      </div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      // Eingaben der Terminzeilen in den Entwurf übernehmen (vor jedem Neuzeichnen und beim Speichern)
+      const read = () => form.querySelectorAll('.drow').forEach(r => {
+        const dt = draft.dates[+r.dataset.i];
+        dt.label = r.querySelector('.lbl').value.trim();
+        if (dt.rule === 'fixed'){ dt.d = +r.querySelector('.d').value; dt.m = +r.querySelector('.m').value; dt.y = +r.querySelector('.y').value || null; }
+      });
+      const redraw = () => { sheet.querySelector('#dates').innerHTML = datesHTML(); };
+      form.addEventListener('click', ev => {
+        const p = ev.target.closest('[data-preset]'), rm = ev.target.closest('[data-rm]');
+        if (p){
+          read();
+          const pr = PRESETS[+p.dataset.preset];
+          const dt = {id: uid(), label: pr.label, icon: pr.icon, rule: pr.rule};
+          if (pr.rule === 'fixed'){ dt.m = pr.m || new Date().getMonth() + 1; dt.d = pr.d || 1; }
+          draft.dates.push(dt); redraw();
+          const row = sheet.querySelector(`.drow[data-i="${draft.dates.length - 1}"]`);
+          (pr.custom ? row.querySelector('.lbl') : row.querySelector('.d'))?.focus();
+        }
+        if (rm){ read(); draft.dates.splice(+rm.dataset.rm, 1); redraw(); }
+      });
+      // Art wechseln: passendes Standard-Symbol, solange keins bewusst gewählt wurde
+      form.addEventListener('change', ev => {
+        if (ev.target.name !== 'kind') return;
+        const ic = form.querySelector('[name=icon]:checked');
+        if (ic && ['👤', '📅'].includes(ic.value)) form.querySelector(`[name=icon][value="${ev.target.value === 'person' ? '👤' : '📅'}"]`).checked = true;
+      });
+      form.addEventListener('submit', ev => {
+        ev.preventDefault(); read();
+        const id = eid || uid();
+        mine.entries[id] = {
+          name: form.name.value.trim(), kind: form.querySelector('[name=kind]:checked').value,
+          icon: form.querySelector('[name=icon]:checked')?.value || '👤', note: form.note.value.trim(),
+          dates: draft.dates.map(dt => ({...dt, label: dt.label || 'Termin'})), created: e?.created || Date.now(),
+        };
+        saveMine(); render(); openEntry(id); toast('Gespeichert');
+      });
+      sheet.querySelector('#entryDel')?.addEventListener('click', () => {
+        const n = giftsOf(eid).length;
+        if (!confirm(`„${e.name}“${n ? ` und ${n} eingetragene Geschenk${n > 1 ? 'e' : ''}` : ''} löschen?`)) return;
+        giftsOf(eid).forEach(([id]) => delete mine.gifts[id]);
+        delete mine.entries[eid];
+        saveMine(); hideModal(); render(); toast('Gelöscht');
+      });
+      if (!e) focusFine(form.name);
+    });
+}
+
+/* ---------- Geschenk / Idee anlegen / bearbeiten ---------- */
+const words = s => String(s || '').toLowerCase().split(/[^a-z0-9äöüß]+/).filter(w => w.length >= 4);
+function openGiftForm(gid, pre = {}){
+  const old = gid ? mine.gifts[gid] : null;
+  const g = old ? {...old} : {title: pre.title || '', eid: pre.eid || null, dateId: null, year: pre.year ?? null, status: pre.status || 'bought', price: null, link: '', note: ''};
+  if (old && old.eid && old.dateId == null) g.dateId = '';   // leere Werte speichert die Cloud nicht: '' = „Sonstiges“
+  const back = old ? old.eid : pre.eid;   // nach Speichern/Abbrechen zurück zur Person
+  const entries = Object.entries(mine.entries).sort((a, b) => byName(a[1].name, b[1].name));
+  let yearTouched = !!old;
+
+  openModal(`
+    <div class="sheet-head"><h2>${old ? (g.status === 'idea' ? 'Idee bearbeiten' : 'Geschenk bearbeiten') : (g.status === 'idea' ? '💡 Neue Idee' : '🎁 Neues Geschenk')}</h2><button class="icon-btn" data-action="${back ? 'entry' : 'close'}" data-id="${back || ''}">✕</button></div>
+    <form id="giftForm" autocomplete="off">
+      <label class="field"><span>Was?</span><input name="title" maxlength="80" value="${esc(g.title)}" placeholder="z. B. Kochbuch „Italien“" required></label>
+      <div id="simMsg"></div>
+      <label class="field"><span>Für wen?</span><select name="eid">
+        <option value="">– noch offen –</option>
+        ${entries.map(([id, e]) => `<option value="${id}" ${g.eid === id ? 'selected' : ''}>${e.icon} ${esc(e.name)}</option>`).join('')}
+      </select></label>
+      <div class="field" id="occField"><span>Anlass</span><div class="opts" id="occOpts"></div></div>
+      <div class="field"><span>Stand</span><div class="opts">
+        ${Object.entries(STATUS).map(([k, s]) => opt('status', k, `${s.icon} ${s.name}`, g.status === k)).join('')}
+      </div></div>
+      <div class="row2">
+        <label class="field"><span>Jahr</span><input type="number" name="year" min="1950" max="2100" value="${g.year ?? ''}" placeholder="irgendwann"><small id="yearHint"></small></label>
+        <label class="field"><span>Preis in € <em>(optional)</em></span><input type="number" name="price" min="0" step="0.01" value="${g.price ?? ''}"></label>
+      </div>
+      <label class="field"><span>Link <em>(optional)</em></span><input type="url" name="link" value="${esc(g.link)}" placeholder="https://…"></label>
+      <label class="field"><span>Notiz <em>(optional)</em></span><textarea name="note" rows="2" placeholder="Wo gekauft, Größe, Umtausch bis …">${esc(g.note)}</textarea></label>
+      <div id="pastBox"></div>
+      <div class="actions stack rev">
+        ${old ? '<button type="button" class="btn danger" id="giftDel">Löschen</button>' : ''}
+        <button type="button" class="btn" data-action="${back ? 'entry' : 'close'}" data-id="${back || ''}">Abbrechen</button>
+        <button type="submit" class="btn primary">Speichern</button>
+      </div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      const curEntry = () => mine.entries[form.eid.value];
+      const curDt = () => (curEntry()?.dates || []).find(dt => dt.id === form.querySelector('[name=dateId]:checked')?.value);
+      const isIdea = () => form.querySelector('[name=status]:checked').value === 'idea';
+      const setYear = () => {
+        if (!yearTouched) form.year.value = isIdea() ? '' : giftYear(curDt());
+        form.querySelector('#yearHint').textContent = isIdea() ? 'Leer lassen, wenn es noch keinem Jahr zugeordnet ist.' : '';
+      };
+      // Anlass-Auswahl passend zur Person; vorbelegt mit dem nächsten Termin
+      const drawOcc = () => {
+        const e = curEntry();
+        sheet.querySelector('#occField').hidden = !e;
+        if (!e) return;
+        const ds = e.dates || [];
+        let sel = g.eid === form.eid.value && g.dateId != null ? g.dateId : (nextOcc(e)?.dt.id ?? '');
+        if (!old && pre.year && ds.length) sel = ds.map(dt => ({dt, d: dateOn(dt, pre.year)})).sort((a, b) => Math.abs(daysBetween(today(), a.d)) - Math.abs(daysBetween(today(), b.d)))[0].dt.id;
+        sheet.querySelector('#occOpts').innerHTML = ds.map(dt => opt('dateId', dt.id, `${dt.icon} ${esc(dt.label)}`, sel === dt.id)).join('') + opt('dateId', '', '✨ Sonstiges', sel === '');
+      };
+      // Vergleich mit früheren Jahren: was hat diese Person schon bekommen?
+      const drawPast = () => {
+        const list = giftsOf(form.eid.value).filter(([id, x]) => id !== gid && x.status !== 'idea' && x.year != null).sort((a, b) => b[1].year - a[1].year).slice(0, 8);
+        sheet.querySelector('#pastBox').innerHTML = list.length ? `<div class="hint"><b>Früher geschenkt</b><div class="past" style="margin-top:6px">${list.map(([, x]) => `<div><span>${x.year} · ${esc(x.label)}:</span> ${esc(x.title)}</div>`).join('')}</div></div>` : '';
+      };
+      const checkSimilar = () => {
+        const w = new Set(words(form.title.value));
+        const hits = w.size ? giftsOf(form.eid.value).filter(([id, x]) => id !== gid && x.status !== 'idea' && words(x.title).some(t => w.has(t))) : [];
+        sheet.querySelector('#simMsg').innerHTML = hits.length ? `<div class="warnmsg">⚠️ Ähnliches gab es schon: ${hits.map(([, x]) => `${x.year} „${esc(x.title)}“`).join(', ')}</div>` : '';
+      };
+      drawOcc(); drawPast(); checkSimilar(); setYear();
+      if (old) form.year.value = g.year ?? '';
+      if (!old && pre.year) form.year.value = pre.year;
+      if (!old && pre.year) yearTouched = true;
+
+      form.year.addEventListener('input', () => { yearTouched = true; });
+      form.title.addEventListener('input', checkSimilar);
+      form.addEventListener('change', ev => {
+        if (ev.target.name === 'eid'){ drawOcc(); drawPast(); checkSimilar(); setYear(); }
+        if (ev.target.name === 'dateId' || ev.target.name === 'status') setYear();
+      });
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const e = curEntry(), dt = curDt();
+        let year = +form.year.value || null;
+        if (!year && !isIdea()) year = giftYear(dt);
+        const id = gid || uid();
+        mine.gifts[id] = {
+          title: form.title.value.trim(), eid: e ? form.eid.value : null,
+          dateId: e ? (dt?.id || '') : null, label: e ? (dt?.label || 'Sonstiges') : '',
+          status: form.querySelector('[name=status]:checked').value, year,
+          price: form.price.value === '' ? null : Math.round(+form.price.value * 100) / 100,
+          link: form.link.value.trim(), note: form.note.value.trim(), at: old?.at || Date.now(),
+        };
+        saveMine(); render();
+        if (e) openEntry(form.eid.value); else hideModal();
+        toast('Gespeichert');
+      });
+      sheet.querySelector('#giftDel')?.addEventListener('click', () => {
+        if (!confirm(`„${old.title}“ löschen?`)) return;
+        delete mine.gifts[gid];
+        saveMine(); render();
+        if (back && mine.entries[back]) openEntry(back); else hideModal();
+        toast('Gelöscht');
+      });
+      if (!old) focusFine(form.title);
+    });
+}
+
+/* ---------- 💭 Idee schnell festhalten ---------- */
+function openIdea(eid){
+  const people = Object.entries(mine.entries).sort((a, b) => (nextOcc(a[1])?.date || '9').localeCompare(nextOcc(b[1])?.date || '9'));
+  openModal(`
+    <div class="sheet-head"><h2>💭 Idee festhalten</h2><button class="icon-btn" data-action="${eid ? 'entry' : 'close'}" data-id="${eid || ''}">✕</button></div>
+    <p class="muted">Schnell notieren, bevor sie weg ist. Nur du siehst sie.</p>
+    <form id="ideaForm" autocomplete="off">
+      <label class="field"><span>Idee</span><input name="text" maxlength="80" placeholder="z. B. Mama mag den Tee aus dem Urlaub" required></label>
+      <div class="field"><span>Für wen? <em>(optional)</em></span><div class="opts">
+        ${opt('eid', '', '– später –', !eid)}${people.map(([id, e]) => opt('eid', id, `${e.icon} ${esc(e.name)}`, eid === id)).join('')}
+      </div></div>
+      <div class="actions"><button type="button" class="btn" data-action="${eid ? 'entry' : 'close'}" data-id="${eid || ''}">Abbrechen</button><button type="submit" class="btn primary">Merken</button></div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const to = form.querySelector('[name=eid]:checked').value || null;
+        mine.gifts[uid()] = {title: form.text.value.trim(), eid: to, dateId: null, label: '', status: 'idea', year: null, at: Date.now()};
+        saveMine(); render();
+        if (to) openEntry(to); else hideModal();
+        toast('Idee gemerkt 💡');
+      });
+      focusFine(form.text);
+    });
+}
+
+/* ---------- Adventskalender: Türchen ---------- */
+const whoOpt = (name, k, checked) => `<label class="opt who who-${k}" ${pStyle(k)}><input type="radio" name="${name}" value="${k}" ${checked ? 'checked' : ''}><span>${esc(P(k).name)}</span></label>`;
+function openDoor(d){
+  const y = ui.advYear, key = adventKey(y, d), doc = adventDoc(y, d), plan = adventPlan(y, d);
+  const past = Object.entries(state.advent).filter(([k, x]) => k.endsWith('-' + pad(d)) && k !== key && x.text).sort((a, b) => b[0].localeCompare(a[0]));
+  openModal(`
+    <div class="sheet-head"><h2>🕯️ Türchen ${d}</h2><button class="icon-btn" data-action="close">✕</button></div>
+    <p class="muted">${esc(fmt(`${y}-12-${pad(d)}`, {weekday:'long', day:'numeric', month:'long', year:'numeric'}))}</p>
+    <form id="doorForm" autocomplete="off">
+      <div class="field"><span>Wer ist dran?</span><div class="opts">${PK.map(k => whoOpt('who', k, adventWho(y, d) === k)).join('')}</div>
+        <small>Laut Verteilung: ${esc(P(plan).name)}. Zum Tauschen einfach die andere Person wählen.</small></div>
+      <label class="field"><span>Was gibt es?</span><input name="text" maxlength="80" value="${esc(doc.text)}" placeholder="z. B. Lieblingsschokolade"></label>
+      <div id="simMsg"></div>
+      <div class="field"><label class="opt" style="display:block"><input type="checkbox" name="done" ${doc.done ? 'checked' : ''}><span>✓ Besorgt</span></label></div>
+      ${past.length ? `<div class="hint"><b>Früher an Türchen ${d}</b><div class="past" style="margin-top:6px">${past.map(([k, x]) => `<div><span>${k.slice(0, 4)} · ${esc(P(x.who || adventPlan(+k.slice(0, 4), d)).name)}:</span> ${esc(x.text)}</div>`).join('')}</div></div>` : ''}
+      <div class="actions"><button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      // Schon mal verschenkt? Über alle Jahre und Türchen prüfen
+      const checkSimilar = () => {
+        const w = new Set(words(form.text.value));
+        const hits = w.size ? Object.entries(state.advent).filter(([k, x]) => k !== key && words(x.text).some(t => w.has(t))) : [];
+        sheet.querySelector('#simMsg').innerHTML = hits.length ? `<div class="warnmsg">⚠️ Ähnliches gab es schon: ${hits.map(([k, x]) => `${k.slice(0, 4)} Türchen ${+k.slice(5)} „${esc(x.text)}“`).join(', ')}</div>` : '';
+      };
+      form.text.addEventListener('input', checkSimilar);
+      checkSimilar();
+      // Wer etwas einträgt, hat es meist auch schon: Häkchen automatisch setzen, solange es nicht bewusst geändert wurde
+      let doneTouched = !!doc.text;
+      form.done.addEventListener('change', () => { doneTouched = true; });
+      form.text.addEventListener('input', () => { if (!doneTouched) form.done.checked = !!form.text.value.trim(); });
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const who = form.querySelector('[name=who]:checked').value;
+        state.advent[key] = {who: who === plan ? null : who, text: form.text.value.trim(), done: form.done.checked || null, at: Date.now(), by: ui.me || null};
+        save(); hideModal(); render(); toast('Gespeichert');
+      });
+    });
+}
+function openAdventStart(){
+  const y = ui.advYear, cur = adventStart(y);
+  openModal(`
+    <div class="sheet-head"><h2>Verteilung ${y}</h2><button class="icon-btn" data-action="close">✕</button></div>
+    <p class="muted">Wer bekommt Türchen 1? Danach geht es reihum weiter. In den Folgejahren rückt der Start automatisch eine Person weiter.</p>
+    <form><div class="opts">${PK.map(k => whoOpt('start', k, cur === k)).join('')}</div>
+    <div class="hint">Einzeln getauschte Türchen (⇄) bleiben bei ihrer Person.</div>
+    <div class="actions"><button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div></form>`, sheet => {
+      sheet.querySelector('form').addEventListener('submit', ev => {
+        ev.preventDefault();
+        state.adventYears[yKey(y)] = {start: ev.target.querySelector('[name=start]:checked').value};
+        save(); hideModal(); render(); toast('Gespeichert');
+      });
+    });
+}
+
+/* ---------- Wichteln: von Hand eintragen, Lostöpfe ---------- */
+function openLotsForm(){
+  const y = ui.wYear, w = state.wichtel[yKey(y)];
+  // Vorschläge: Lostopf plus alles, was in früheren Jahren schon vorkam
+  const known = (pool, f) => [...new Set([...pool, ...Object.values(state.wichtel).flatMap(x => Object.values(x.lots || {}).map(l => l[f]))])];
+  openModal(`
+    <div class="sheet-head"><h2>🎲 Wichteln ${y} eintragen</h2><button class="icon-btn" data-action="close">✕</button></div>
+    <p class="muted">Zum Nachtragen früherer Jahre oder wenn ihr ohne App gelost habt.</p>
+    <form autocomplete="off">
+      ${ROUNDS.map(r => `<div class="section" style="margin-top:12px"><h3>${r.name}</h3></div>${r.lots.map(k => `<div class="lotrow"><span>${esc(P(k[0]).name)} → ${esc(P(k[1]).name)}</span>
+        <input name="c_${k}" list="wcol" placeholder="Farbe" value="${esc(w?.lots?.[k]?.color)}"><input name="k_${k}" list="wcat" placeholder="Kategorie" value="${esc(w?.lots?.[k]?.cat)}"></div>`).join('')}`).join('')}
+      <datalist id="wcol">${known(wColors(), 'color').map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+      <datalist id="wcat">${known(wCats(), 'cat').map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+      <div class="actions stack rev">
+        ${w ? '<button type="button" class="btn danger" id="lotsDel">Jahr löschen</button>' : ''}
+        <button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const lots = {};
+        LOTS.forEach(k => { const c = form['c_' + k].value.trim(), t = form['k_' + k].value.trim(); if (c || t) lots[k] = {color: c || '?', cat: t || '?'}; });
+        if (!Object.keys(lots).length){ toast('Bitte mindestens ein Los eintragen'); return; }
+        state.wichtel[yKey(y)] = {lots, drawnAt: null, by: ui.me || null, at: Date.now()};
+        save(); hideModal(); render(); toast('Gespeichert');
+      });
+      sheet.querySelector('#lotsDel')?.addEventListener('click', () => {
+        if (!confirm(`Wichteln ${y} für alle löschen?`)) return;
+        delete state.wichtel[yKey(y)];
+        save(); hideModal(); render(); toast('Gelöscht');
+      });
+    });
+}
+function openPools(){
+  openModal(`
+    <div class="sheet-head"><h2>⚙️ Farben & Kategorien</h2><button class="icon-btn" data-action="close">✕</button></div>
+    <p class="muted">Daraus lost die App. Eine Angabe pro Zeile – gilt für alle. Für eine schöne Auslosung mindestens 6 Farben und 6 Kategorien.</p>
+    <form><div class="row2">
+      <label class="field"><span>Farben</span><textarea name="c" rows="12">${esc(wColors().join('\n'))}</textarea>
+        <small>Bekannte Farbnamen bekommen einen Farbpunkt: ${Object.keys(WCOLORS).join(', ')}.</small></label>
+      <label class="field"><span>Kategorien</span><textarea name="k" rows="12">${esc(wCats().join('\n'))}</textarea></label>
+    </div>
+    <div class="actions"><button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div></form>`, sheet => {
+      sheet.querySelector('form').addEventListener('submit', ev => {
+        ev.preventDefault();
+        const lines = s => [...new Set(s.split('\n').map(x => x.trim()).filter(Boolean))];
+        state.settings = {...state.settings, wColors: lines(ev.target.c.value), wCats: lines(ev.target.k.value)};
+        save(); hideModal(); render(); toast('Gespeichert');
+      });
+    });
+}
+
+/* ---------- Wunschliste: eigener Wunsch ---------- */
+function openWishForm(id){
+  const w = id ? state.wishes[id] : null;
+  openModal(`
+    <div class="sheet-head"><h2>${w ? 'Wunsch bearbeiten' : '⭐ Neuer Wunsch'}</h2><button class="icon-btn" data-action="close">✕</button></div>
+    <form autocomplete="off">
+      <label class="field"><span>Was wünschst du dir?</span><input name="title" maxlength="80" value="${esc(w?.title)}" placeholder="z. B. Wanderschuhe Gr. 39" required></label>
+      <label class="field"><span>Link <em>(optional)</em></span><input type="url" name="link" value="${esc(w?.link)}" placeholder="https://…"></label>
+      <label class="field"><span>Details <em>(optional)</em></span><textarea name="note" rows="2" placeholder="Farbe, Größe, wo es das gibt …">${esc(w?.note)}</textarea></label>
+      <div class="field"><label class="opt" style="display:block"><input type="checkbox" name="fav" ${w?.fav ? 'checked' : ''}><span>⭐ Herzenswunsch</span></label></div>
+      <div class="actions stack rev">
+        ${w ? '<button type="button" class="btn danger" id="wishDel">Löschen</button>' : ''}
+        <button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div>
+    </form>`, sheet => {
+      const form = sheet.querySelector('form');
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        state.wishes[id || uid()] = {owner: ui.me, title: form.title.value.trim(), link: form.link.value.trim(), note: form.note.value.trim(), fav: form.fav.checked || null, at: w?.at || Date.now()};
+        save(); hideModal(); render(); toast('Gespeichert');
+      });
+      sheet.querySelector('#wishDel')?.addEventListener('click', () => {
+        if (!confirm(`„${w.title}“ löschen? Zum Beispiel, weil du es bekommen hast.`)) return;
+        delete state.wishes[id]; delete state.reserved[id];
+        save(); hideModal(); render(); toast('Gelöscht');
+      });
+      if (!w) focusFine(form.title);
+    });
+}
+
+/* ---------- Einstellungen ---------- */
+function openSettings(first){
+  openModal(`
+    <div class="sheet-head"><h2>${first ? 'Willkommen bei Geschenke 🎁' : 'Einstellungen'}</h2>${first ? '' : '<button class="icon-btn" data-action="close">✕</button>'}</div>
+    ${first ? `
+    <p style="color:var(--muted);margin-top:0">Behalte den Überblick, wem du was schenkst – und plant gemeinsam Adventskalender und Wichteln. Was du unter „Meine Geschenke“ einträgst, sehen nur deine eigenen Geräte.</p>
+    <div class="section"><h3>Wer bist du?</h3></div>
+    ${ownerHTML()}
+    <div class="actions">
+      <button type="button" class="btn" data-action="sync-join" style="margin-right:auto">🔗 Schon eingerichtet? Gerät verbinden</button>
+      <button class="btn primary" data-action="first-done">Los geht’s</button>
+    </div>` : `
+    <div class="section"><h3>Darstellung</h3></div>
+    <div class="seg-switch">
+      ${[['auto','🌗 Automatisch'],['light','☀️ Hell'],['dark','🌙 Dunkel']].map(([t, l]) => `<button class="${ui.theme === t ? 'active' : ''}" data-action="theme" data-t="${t}">${l}</button>`).join('')}
+    </div>
+    <p class="muted" style="margin-top:8px">Gilt nur für dieses Gerät. „Automatisch“ folgt der Einstellung von Android.</p>
+    <div class="section"><h3>Dieses Gerät gehört</h3></div>
+    ${ownerHTML()}
+    <p class="muted" style="margin-top:8px">Damit die App weiß, welche Türchen und Lose deine sind – und welche Reservierungen auf deiner Wunschliste sie vor dir verstecken muss.</p>
+    <div class="section"><h3>Namen & Farben</h3></div>
+    <form id="pplForm">
+      ${PK.map(k => `<div class="field" style="margin:10px 0"><input name="n${k}" maxlength="20" value="${esc(P(k).name)}" aria-label="Name">
+        <div class="swatches">${COLORS.map(c => `<label class="opt"><input type="radio" name="c${k}" value="${c}" ${P(k).color === c ? 'checked' : ''}><span style="background:${c}"></span></label>`).join('')}</div></div>`).join('')}
+      <div class="actions start"><button type="submit" class="btn">Namen & Farben speichern</button></div>
+    </form>
+    <p class="muted" style="margin-top:8px">Gilt für alle verbundenen Geräte.</p>
+    <div id="syncSection">${syncSectionHTML()}</div>
+    <div id="mineSection">${mineSectionHTML()}</div>
+    <div id="pushSection">${pushSectionHTML()}</div>
+    <div class="section"><h3>Datensicherung</h3></div>
+    <p class="muted">Alles wird automatisch auf diesem Gerät gespeichert. Das Backup enthält auch deine privaten Geschenke – gut aufheben.</p>
+    <div class="actions start">
+      <button class="btn" data-action="export">⬇️ Backup exportieren</button>
+      <button class="btn" data-action="import">⬆️ Backup importieren</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <div class="section"><h3>Sonstiges</h3></div>
+    <div class="actions start">
+      <button class="btn" data-action="reset" style="color:#dc2626">Alles zurücksetzen</button>
+    </div>`}`, sheet => {
+      sheet.querySelector('#importFile')?.addEventListener('change', importBackup);
+      sheet.querySelector('#pplForm')?.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const f = ev.target;
+        state.settings = {...state.settings, people: Object.fromEntries(PK.map(k => [k, {name: f['n' + k].value.trim() || PEOPLE_DEF[k].name, color: f.querySelector(`[name=c${k}]:checked`).value}]))};
+        save(); render(); openSettings(false); toast('Gespeichert');
+      });
+    });
+}
+
+function exportBackup(){
+  const blob = new Blob([JSON.stringify({app: APP, version: 1, shared: state, mine}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${APP}-backup-${today()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('Backup erstellt');
+}
+function importBackup(e){
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (data.app !== APP || !data.shared || !data.mine) throw new Error();
+      if (!confirm('Backup laden? Die aktuellen Daten auf diesem Gerät werden ersetzt.')) return;
+      state = Object.assign(defaultState(), data.shared, {setupDone:true});
+      mine = Object.assign(defaultMine(), data.mine);
+      save(); saveMine(); closeModal(); render(); toast('Backup geladen');
+    } catch(err){ toast('Datei konnte nicht gelesen werden'); }
+  };
+  r.readAsText(file);
+}
+
+/* ---------- Toast & Banner ---------- */
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+function showBanner(msg){ const b = $('#banner'); b.textContent = msg; b.hidden = false; }
+
+/* =========================================================
+   Ereignisse
+   ========================================================= */
+function step(dir){ ui.cursor = addMonths(ui.cursor, dir); render(); }
+
+document.addEventListener('click', e => {
+  if (e.target.closest('a[href]')) return;   // Links (z. B. zum Shop) normal öffnen
+  const tab = e.target.closest('#tabs button');
+  if (tab){ ui.view = tab.dataset.view; saveUI(); render(); window.scrollTo({top:0}); return; }
+  if (e.target === $('#modal')) return closeModal();
+  const el = e.target.closest('[data-action]'); if (!el) return;
+  switch (el.dataset.action){
+    case 'close':      closeModal(); break;
+    case 'settings':   openSettings(false); break;
+    case 'first-done': state.setupDone = true; save(); hideModal(); render(); break;
+    case 'sub':        ui.sub = el.dataset.s; saveUI(); render(); break;
+    case 'prev':       step(-1); break;
+    case 'next':       step(1); break;
+    case 'now':        ui.cursor = today(); render(); break;
+    case 'new':        ui.view === 'wishes' ? openWishForm() : openEntryForm(); break;
+    case 'me':
+      ui.me = el.dataset.k; saveUI();
+      el.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === el));
+      render(); refreshPushSection(); updatePrivateReminders();   // Erinnerungen folgen dem neuen Besitzer
+      break;
+    case 'yprev': case 'ynext': case 'ynow': {
+      const f = ui.view === 'advent' ? 'advYear' : 'wYear';
+      ui[f] = el.dataset.action === 'ynow' ? thisYear() : ui[f] + (el.dataset.action === 'ynext' ? 1 : -1);
+      render(); break;
+    }
+    case 'advfilter':  ui.advFilter = el.dataset.f; saveUI(); render(); break;
+    case 'door':       openDoor(+el.dataset.d); break;
+    case 'adv-start':  openAdventStart(); break;
+    case 'draw':       doDraw(); break;
+    case 'lots-edit':  openLotsForm(); break;
+    case 'pools':      openPools(); break;
+    case 'wyear':      ui.wYear = +el.dataset.y; render(); window.scrollTo({top:0}); break;
+    case 'wishtab':    ui.wishTab = el.dataset.k; saveUI(); render(); break;
+    case 'wish':       openWishForm(el.dataset.id); break;
+    case 'reserve':
+      state.reserved[el.dataset.id] = {by: ui.me, at: Date.now()};
+      save(); render(); toast('Reserviert 🤫');
+      break;
+    case 'unreserve':
+      delete state.reserved[el.dataset.id];
+      save(); render(); toast('Freigegeben');
+      break;
+    case 'entry':      el.dataset.id ? openEntry(el.dataset.id) : closeModal(); break;
+    case 'entry-edit': openEntryForm(el.dataset.id); break;
+    case 'gift':       openGiftForm(el.dataset.id); break;
+    case 'gift-new':   openGiftForm(null, {eid: el.dataset.eid, year: el.dataset.year ? +el.dataset.year : null}); break;
+    case 'idea':       openIdea(el.dataset.eid); break;
+    case 'theme':
+      ui.theme = el.dataset.t; saveUI(); applyTheme();
+      el.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === el));
+      break;
+    case 'sync-create': openSyncCreate(); break;
+    case 'sync-join':   openSyncJoin(); break;
+    case 'sync-share':  openSyncShare('family'); break;
+    case 'mine-share':  openSyncShare('mine'); break;
+    case 'mine-join':   openMineJoin(); break;
+    case 'sync-back':   openSettings(!state.setupDone); break;
+    case 'sync-leave':
+      if (confirm('Dieses Gerät vom Abgleich trennen?\nDie Daten bleiben auf dem Gerät, werden aber nicht mehr mit den anderen abgeglichen.')){
+        stopSync(); openSettings(false); toast('Verbindung getrennt');
+      }
+      break;
+    case 'push-on':   pushEnable(); break;
+    case 'push-off':  pushDisable(); break;
+    case 'push-test': pushTest(); break;
+    case 'export': exportBackup(); break;
+    case 'import': $('#importFile').click(); break;
+    case 'reset':
+      if (confirm(`Wirklich ALLE Daten löschen – auch deine privaten Geschenke?${sync?.family ? '\nAchtung: Die gemeinsamen Daten werden auf ALLEN verbundenen Geräten gelöscht!' : ''}`) && confirm('Sicher? Das kann nicht rückgängig gemacht werden.')){
+        state = defaultState(); mine = defaultMine(); save(); saveMine(); hideModal(); render(); openSettings(true);
+      }
+      break;
+  }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Wischen zum Blättern im Kalender
+let tx = null, ty = null;
+$('#view').addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
+$('#view').addEventListener('touchend', e => {
+  if (tx === null || ui.view !== 'mine' || ui.sub !== 'cal') return;
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > 70 && Math.abs(dy) < 50) step(dx < 0 ? 1 : -1);
+  tx = null;
+}, {passive:true});
+
+// Bei Rückkehr in die App bzw. um Mitternacht: Countdown-Angaben aktualisieren
+let lastDay = today();
+const dayCheck = () => { if (today() !== lastDay){ lastDay = today(); ui.cursor = today(); if ($('#modal').hidden) render(); } };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) dayCheck(); });
+setInterval(dayCheck, 60000);
+
+/* =========================================================
+   Synchronisierung über Firebase Realtime Database
+   Prinzip: Jeder Eintrag ist ein eigener Pfad in der Cloud. Geändert werden
+   nur die Pfade, die sich gegenüber dem letzten bekannten Cloud-Stand
+   ("base") geändert haben – so können mehrere Geräte gleichzeitig arbeiten,
+   auch offline. Das gilt je Kanal (gemeinsam / privat) getrennt.
+   ========================================================= */
+const SYNCKEY = APP + '.sync', PKEYKEY = APP + '.pkey';
+const FB_SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
+const QR_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch(e) { return d; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
+
+let sync = lsGet(SYNCKEY, null);    // {config, family}; family = null, wenn nur „Meine Geschenke“ verbunden ist
+let pkey = lsGet(PKEYKEY, null);    // persönlicher Schlüssel für „Meine Geschenke“ – kennen nur die eigenen Geräte
+let fbApp = null, fbDb = null, starting = null, connStatus = sync ? 'connecting' : 'off', syncError = '', pushSeq = 0;
+for (const [id, ch] of Object.entries(CHANNELS)){
+  Object.assign(ch, {id, ref: null, base: lsGet(`${APP}.${id}.base`, null), dirty: lsGet(`${APP}.${id}.dirty`, {})});
+}
+const chData = ch => ch.id === 'shared' ? state : mine;
+const chKey = ch => ch.id === 'shared' ? sync?.family : pkey;
+const chStore = ch => { lsSet(`${APP}.${ch.id}.base`, ch.base); lsSet(`${APP}.${ch.id}.dirty`, ch.dirty); };
+
+// Stabile Schreibweise wie Firebase sie zurückliefert: Schlüssel sortiert, leere Werte/Listen entfernt
+function canon(v){
+  if (Array.isArray(v)){ const a = v.map(canon).filter(x => x !== undefined); return a.length ? a : undefined; }
+  if (v && typeof v === 'object'){
+    const o = {};
+    Object.keys(v).sort().forEach(k => { const c = canon(v[k]); if (c !== undefined) o[k] = c; });
+    return Object.keys(o).length ? o : undefined;
+  }
+  return v === null || v === undefined || v === '' ? undefined : v;
+}
+function flatten(ch, s){
+  const m = {};
+  ch.singles.forEach(k => { const v = canon(s[k]); if (v !== undefined) m[k] = JSON.stringify(v); });
+  ch.colls.forEach(c => { for (const k in s[c] || {}){ const v = canon(s[c][k]); if (v !== undefined) m[c + '/' + k] = JSON.stringify(v); } });
+  return m;
+}
+function unflatten(ch, m){
+  const s = emptyData(ch);
+  for (const [p, v] of Object.entries(m)){
+    const val = JSON.parse(v), i = p.indexOf('/');
+    if (i < 0){ if (ch.singles.includes(p)) s[p] = val; }
+    else if (ch.colls.includes(p.slice(0, i))) s[p.slice(0, i)][p.slice(i + 1)] = val;
+  }
+  return s;
+}
+const remoteFlat = (ch, val) => flatten(ch, Object.fromEntries([...ch.singles, ...ch.colls].map(k => [k, val?.[k] || {}])));
+function diffFlat(b, c){
+  const out = {};
+  for (const p in c) if (b[p] !== c[p]) out[p] = c[p];
+  for (const p in b) if (!(p in c)) out[p] = null;
+  return out;
+}
+
+function onRemote(ch, snap){
+  const remote = remoteFlat(ch, snap.val());
+  const merged = {...remote}, toPush = {};
+  if (ch.base){
+    const local = flatten(ch, chData(ch));
+    const pending = diffFlat(ch.base, local);
+    for (const k in ch.dirty) if (!(k in pending)) pending[k] = k in local ? local[k] : null;
+    for (const [p, v] of Object.entries(pending)){
+      if (v === null) delete merged[p]; else merged[p] = v;
+      if ((remote[p] ?? null) !== v) toPush[p] = v;
+    }
+  } else ch.dirty = {};
+  ch.base = remote; chStore(ch);
+  // Objekt behalten (andere Funktionen halten Verweise), Inhalt ersetzen
+  const data = chData(ch), fresh = unflatten(ch, merged);
+  [...ch.singles, ...ch.colls].forEach(k => data[k] = fresh[k]);
+  if (ch.id === 'shared'){ state.setupDone = true; saveLocal(); } else saveMineLocal();
+  if (Object.keys(toPush).length) pushPaths(ch, toPush);
+  if ($('#modal').hidden) render(); else refreshUnderModal();
+}
+// Läuft gerade ein Dialog, nur die Liste dahinter aktualisieren (Eingaben im Dialog bleiben erhalten)
+function refreshUnderModal(){
+  VIEWS[ui.view] && VIEWS[ui.view]($('#view'));
+  const ms = $('#mineSection'); if (ms) ms.innerHTML = mineSectionHTML();
+}
+
+function pushPaths(ch, p){
+  if (!ch.ref) return;
+  const obj = {}, mineNow = {};
+  for (const [k, v] of Object.entries(p)){
+    obj[k] = v === null ? null : JSON.parse(v);
+    mineNow[k] = ch.dirty[k] = `${Date.now()}-${++pushSeq}`;
+  }
+  chStore(ch);
+  ch.ref.update(obj).then(() => {
+    for (const k in mineNow) if (ch.dirty[k] === mineNow[k]) delete ch.dirty[k];
+    chStore(ch);
+  }).catch(e => setConn('error', e.message));
+}
+function pushSync(ch){
+  if (!ch.ref || !ch.base) return;
+  const p = diffFlat(ch.base, flatten(ch, chData(ch)));
+  if (Object.keys(p).length) pushPaths(ch, p);
+}
+
+function loadScript(src){
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) return res();
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = () => { s.remove(); rej(new Error('Skript konnte nicht geladen werden (offline?)')); };
+    document.head.appendChild(s);
+  });
+}
+function startSync(){
+  if (!sync) return;
+  return starting ||= (async () => {
+    if (!fbDb){
+      setConn('connecting');
+      try {
+        for (const f of ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-database-compat.js']) await loadScript(FB_SDK + f);
+        fbApp = firebase.apps.find(a => a.name === APP) || firebase.initializeApp(sync.config, APP);
+        const auth = fbApp.auth();
+        const user = await new Promise(r => { const off = auth.onAuthStateChanged(u => { off(); r(u); }); });
+        if (!user) await auth.signInAnonymously();
+        fbDb = fbApp.database();
+        fbDb.ref('.info/connected').on('value', s => { if (connStatus !== 'error') setConn(s.val() ? 'online' : 'offline'); });
+      } catch(e){
+        fbApp = fbDb = null;
+        const msg = String(e.message || e);
+        if (/admin-restricted|operation-not-allowed/.test(msg)) setConn('error', 'Anonyme Anmeldung ist in Firebase nicht aktiviert.');
+        else setConn(navigator.onLine ? 'error' : 'offline', msg);
+        return;
+      }
+    }
+    Object.values(CHANNELS).forEach(attach);
+  })().finally(() => { starting = null; });
+}
+function attach(ch){
+  const key = chKey(ch);
+  if (!key || ch.ref || !fbDb) return;
+  ch.ref = fbDb.ref(ch.root + '/' + key);
+  if (ch.id === 'shared') updatePrivateReminders();   // Termine der nächsten Wochen bei jedem Start neu ablegen
+  ch.ref.on('value', snap => onRemote(ch, snap), e => {
+    ch.ref = null;
+    setConn('error', `Zugriff verweigert. Ist die Datenbank-Regel für „${ch.root}“ aus der Anleitung veröffentlicht? (${e.message})`);
+  });
+}
+function detach(ch){
+  try { ch.ref && ch.ref.off(); } catch(e) {}
+  ch.ref = null; ch.base = null; ch.dirty = {}; chStore(ch);
+}
+function stopSync(){
+  if (pushCfg.on){ try { pushRef()?.remove(); } catch(e) {} pushCfg.on = false; lsSet(PUSHKEY, pushCfg); }
+  Object.values(CHANNELS).forEach(detach);
+  try { fbApp && fbApp.delete(); } catch(e) {}
+  fbApp = fbDb = null; sync = null;
+  lsSet(SYNCKEY, null);
+  setConn('off');
+}
+// Familie anlegen (asNew) oder beitreten. „Meine Geschenke“ bekommt dabei – falls noch nicht vorhanden –
+// einen neuen persönlichen Schlüssel; die privaten Einträge dieses Geräts werden dorthin hochgeladen.
+function connectFamily(config, family, asNew){
+  stopSync();
+  sync = {config, family};
+  CHANNELS.shared.base = asNew ? {} : null;   // neu: alles hochladen · beitreten: Cloud übernehmen
+  if (!pkey){ pkey = newKey(); lsSet(PKEYKEY, pkey); }
+  CHANNELS.priv.base = {};                     // eigene Einträge mit dem Stand in der Cloud zusammenführen
+  lsSet(SYNCKEY, sync); Object.values(CHANNELS).forEach(chStore);
+  startSync();
+}
+// Eigenes weiteres Gerät: „Meine Geschenke“ von dort übernehmen
+function connectMine(config, key){
+  detach(CHANNELS.priv);
+  if (!sync){ sync = {config, family: null}; lsSet(SYNCKEY, sync); }
+  pkey = key; lsSet(PKEYKEY, pkey);
+  CHANNELS.priv.base = null; chStore(CHANNELS.priv);
+  startSync();
+}
+window.addEventListener('online', () => { if (sync) startSync(); });
+
+function setConn(s, err = ''){
+  connStatus = s; syncError = s === 'error' ? err : '';
+  const ind = $('#syncInd');
+  ind.hidden = s === 'off';
+  ind.querySelector('.sdot').className = 'sdot ' + s;
+  ind.title = statusText();
+  const sec = $('#syncSection'); if (sec) sec.innerHTML = syncSectionHTML();
+  const ms = $('#mineSection'); if (ms) ms.innerHTML = mineSectionHTML();
+  refreshPushSection();
+}
+function statusText(){
+  return ({online:'Verbunden – alles wird automatisch abgeglichen', offline:'Offline – Änderungen werden später übertragen',
+    connecting:'Verbinde …', error:'Verbindungsproblem', off:'Nicht verbunden'})[connStatus];
+}
+function syncSectionHTML(){
+  const head = '<div class="section"><h3>Geräte verbinden</h3></div>';
+  if (!sync?.family) return head + `
+    <p class="muted">Gleicht Adventskalender, Wichteln und Wunschlisten zwischen allen ab, die mitmachen – über eure eigene, kostenlose Firebase-Datenbank. Wie das eingerichtet wird, steht in der Anleitung.</p>
+    <div class="actions start">
+      <button class="btn" data-action="sync-create">☁️ Neue Familie anlegen</button>
+      <button class="btn" data-action="sync-join">🔗 Mit Familie verbinden</button>
+    </div>`;
+  return head + `
+    <div class="syncbox"><span class="sdot ${connStatus}"></span>${esc(statusText())}</div>
+    ${syncError ? `<div class="hint" style="color:#dc2626;margin-bottom:10px">${esc(syncError)}</div>` : ''}
+    <div class="actions start">
+      <button class="btn" data-action="sync-share">📱 Weitere Person verbinden</button>
+      <button class="btn" data-action="sync-leave">Verbindung trennen</button>
+    </div>`;
+}
+function mineSectionHTML(){
+  const head = '<div class="section"><h3>🔒 Meine Geschenke · eigene Geräte</h3></div>';
+  if (!sync || !pkey) return head + `
+    <p class="muted">Sobald dieses Gerät verbunden ist, wird „Meine Geschenke“ automatisch privat in der Cloud gesichert – unter einem eigenen, geheimen Schlüssel, den nur deine Geräte kennen.</p>
+    <div class="actions start"><button class="btn" data-action="mine-join">🔗 Mit meinem anderen Gerät verbinden</button></div>`;
+  return head + `
+    <p class="muted">Gesichert unter deinem persönlichen Schlüssel. Andere Personen können diese Einträge nicht sehen – auch nicht über die App.</p>
+    <div class="syncbox"><span class="sdot ${CHANNELS.priv.ref ? connStatus : 'connecting'}"></span>${CHANNELS.priv.ref ? esc(statusText()) : 'Verbinde …'}</div>
+    <div class="actions start">
+      <button class="btn" data-action="mine-share">📱 Mein weiteres Gerät verbinden</button>
+      <button class="btn" data-action="mine-join">🔗 Von meinem anderen Gerät übernehmen</button>
+    </div>`;
+}
+
+function parseConfig(text){
+  const c = {};
+  text.replace(/["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g, (_, k, v) => { c[k] = v; });
+  if (!c.apiKey || !c.projectId) return {error:'Das sieht nicht nach einer Firebase-Konfiguration aus (apiKey/projectId fehlen).'};
+  if (!c.databaseURL) return {error:'In der Konfiguration fehlt „databaseURL“. Bitte zuerst die Realtime Database anlegen und die Konfiguration danach erneut kopieren.'};
+  return {config:{apiKey:c.apiKey, authDomain:c.authDomain || `${c.projectId}.firebaseapp.com`, databaseURL:c.databaseURL, projectId:c.projectId, appId:c.appId || ''}};
+}
+function newKey(){
+  const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = new Uint32Array(32);
+  crypto.getRandomValues(r);
+  return [...r].map(x => chars[x % chars.length]).join('');
+}
+// Verbindungscodes: Familie {c, f} als #join=…, eigene Geräte {c, k} als #mine=…
+const encodeCode = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+function decodeCode(code){
+  try {
+    const s = code.trim().replace(/^.*(join|mine)=/, '').replace(/-/g,'+').replace(/_/g,'/');
+    const d = JSON.parse(decodeURIComponent(escape(atob(s))));
+    if (!d.c || !d.c.databaseURL) return null;
+    if (d.f && d.f.length >= 24) return {kind: 'family', ...d};
+    if (d.k && d.k.length >= 24) return {kind: 'mine', ...d};
+    return null;
+  } catch(e) { return null; }
+}
+
+function openSyncCreate(){
+  openModal(`
+    <div class="sheet-head"><h2>☁️ Neue Familie anlegen</h2><button class="icon-btn" data-action="sync-back">✕</button></div>
+    <p class="muted">Füge hier die Firebase-Konfiguration ein. Du kannst den ganzen Codeblock einfügen – die App sucht sich die nötigen Angaben heraus.</p>
+    <label class="field"><span>Firebase-Konfiguration</span><textarea id="cfg" rows="9" class="code" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;…&quot;,&#10;  authDomain: &quot;…&quot;,&#10;  databaseURL: &quot;…&quot;,&#10;  …&#10;};"></textarea></label>
+    <div class="hint" id="cfgMsg">Danach könnt ihr die anderen per QR-Code verbinden.</div>
+    <div class="actions"><button class="btn" data-action="sync-back">Abbrechen</button><button class="btn primary" id="cfgGo">Verbinden</button></div>`, sheet => {
+      sheet.querySelector('#cfgGo').addEventListener('click', () => {
+        const r = parseConfig(sheet.querySelector('#cfg').value);
+        if (r.error){ const m = sheet.querySelector('#cfgMsg'); m.textContent = '⚠️ ' + r.error; m.style.color = '#dc2626'; return; }
+        connectFamily(r.config, newKey(), true);
+        openSyncShare('family');
+        toast('Familie angelegt');
+      });
+    });
+}
+function openJoinForm(title, text, warn, kind){
+  openModal(`
+    <div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-action="sync-back">✕</button></div>
+    <p class="muted">${text}</p>
+    <label class="field"><span>Verbindungscode oder -link</span><textarea id="jcode" rows="5" class="code"></textarea></label>
+    <div class="hint" id="jMsg">${warn}</div>
+    <div class="actions"><button class="btn" data-action="sync-back">Abbrechen</button><button class="btn primary" id="jGo">Verbinden</button></div>`, sheet => {
+      sheet.querySelector('#jGo').addEventListener('click', () => {
+        const d = decodeCode(sheet.querySelector('#jcode').value);
+        if (!d || d.kind !== kind){ const m = sheet.querySelector('#jMsg'); m.textContent = '⚠️ Der Code ist ungültig oder gehört nicht hierher.'; m.style.color = '#dc2626'; return; }
+        applyCode(d);
+      });
+    });
+}
+const openSyncJoin = () => openJoinForm('🔗 Mit Familie verbinden',
+  'Am einfachsten: Auf einem schon verbundenen Gerät unter ⚙ → „Weitere Person verbinden“ den QR-Code mit der Handykamera scannen. Alternativ hier den Verbindungscode einfügen:',
+  'Adventskalender und Wichteln werden von der Familie übernommen. Deine privaten Geschenke bleiben erhalten.', 'family');
+const openMineJoin = () => openJoinForm('🔗 Von meinem anderen Gerät übernehmen',
+  'Auf deinem anderen Gerät unter ⚙ → „Mein weiteres Gerät verbinden“ den QR-Code scannen – oder den Code hier einfügen:',
+  '⚠️ „Meine Geschenke“ auf diesem Gerät wird durch den Stand deines anderen Geräts ersetzt.', 'mine');
+function applyCode(d){
+  if (d.kind === 'family'){
+    connectFamily(d.c, d.f, false);
+    state.setupDone = true; saveLocal();
+    toast('Verbunden – Daten werden geladen …');
+  } else {
+    connectMine(d.c, d.k);
+    state.setupDone = true; saveLocal();
+    toast('Meine Geschenke werden geladen …');
+  }
+  hideModal(); render();
+}
+function openSyncShare(kind){
+  const fam = kind === 'family';
+  const code = encodeCode(fam ? {c: sync.config, f: sync.family} : {c: sync.config, k: pkey});
+  const link = location.protocol === 'https:' ? location.href.split('#')[0] + (fam ? '#join=' : '#mine=') + code : '';
+  openModal(`
+    <div class="sheet-head"><h2>${fam ? '📱 Weitere Person verbinden' : '📱 Mein weiteres Gerät verbinden'}</h2><button class="icon-btn" data-action="sync-back">✕</button></div>
+    ${fam ? '' : '<div class="warnmsg" style="margin:0 0 10px">🔒 Nur mit deinen <b>eigenen</b> Geräten verbinden! Wer diesen Code hat, sieht alle deine privaten Geschenke.</div>'}
+    ${link ? `<p class="muted">Mit der Kamera des Handys scannen und den Link öffnen – fertig.</p><div class="qr" id="qr">QR-Code wird erstellt …</div>`
+           : `<div class="hint">Die App läuft gerade als lokale Datei. Für den QR-Code bitte die App über ihre Webadresse öffnen. Der Code unten funktioniert trotzdem.</div>`}
+    <label class="field"><span>Oder Verbindungscode${link ? '-Link' : ''} teilen</span><textarea rows="4" class="code" readonly id="shareCode">${esc(link || code)}</textarea></label>
+    ${fam ? '<div class="hint">🔒 Wer diesen Code hat, kann Adventskalender und Wichteln sehen und ändern. Eure privaten Geschenke bleiben trotzdem privat.</div>' : ''}
+    <div class="actions"><button class="btn" id="copyCode">Kopieren</button><button class="btn primary" data-action="sync-back">Fertig</button></div>`, sheet => {
+      sheet.querySelector('#copyCode').addEventListener('click', () => {
+        const ta = sheet.querySelector('#shareCode'); ta.select();
+        (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).catch(() => document.execCommand('copy'));
+        toast('Kopiert');
+      });
+      if (link) loadScript(QR_LIB).then(() => {
+        const q = qrcode(0, 'L'); q.addData(link); q.make();
+        sheet.querySelector('#qr').innerHTML = q.createSvgTag({cellSize:4, margin:0, scalable:true});
+      }).catch(() => { sheet.querySelector('#qr').textContent = 'QR-Code braucht Internet – bitte den Link unten nutzen.'; });
+    });
+}
+function checkJoinLink(){
+  if (!/(join|mine)=/.test(location.hash)) return false;
+  const d = decodeCode(location.hash);
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!d){ toast('Ungültiger Verbindungslink'); return false; }
+  if (d.kind === 'family'){
+    if (sync?.family === d.f){ toast('Dieses Gerät ist bereits verbunden'); return true; }
+    if (!confirm('Dieses Gerät mit eurer Familie verbinden?\nAdventskalender und Wichteln werden übernommen.')) return false;
+  } else {
+    if (pkey === d.k){ toast('Dieses Gerät ist bereits verbunden'); return true; }
+    if (!confirm('„Meine Geschenke“ von deinem anderen Gerät übernehmen?\nDie privaten Einträge auf diesem Gerät werden dadurch ersetzt.')) return false;
+  }
+  applyCode(d);
+  return true;
+}
+
+/* =========================================================
+   Erinnerungen (Web Push)
+   Das Gerät meldet sich in den gemeinsamen Daten unter push/<Geräte-ID> an.
+   Verschickt wird stündlich von GitHub Actions (push-senden.js).
+   Termine aus „Meine Geschenke“ berechnet das Gerät selbst und legt sie verschlüsselt ab:
+   Lesen kann sie nur das Erinnerungs-Skript (mit dem privaten VAPID-Schlüssel), nicht die anderen.
+   ========================================================= */
+const PUSHKEY = APP + '.push';
+let pushCfg = lsGet(PUSHKEY, {on: false, hour: 18, lead: 7});
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol === 'https:';
+function deviceId(){
+  let id = lsGet(APP + '.device', null);
+  if (!id){ id = uid() + uid(); lsSet(APP + '.device', id); }
+  return id;
+}
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64uToBytes = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const pushRef = () => CHANNELS.shared.ref?.child('push/' + deviceId());
+
+// Private Erinnerungen der nächsten 60 Tage: x Tage vorher immer, am Vortag nur, wenn noch nichts besorgt ist
+function privateReminders(){
+  const td = today(), lead = pushCfg.lead || 7, out = [];
+  for (const o of occList(td, addDays(td, 60))){
+    const got = giftsOf(o.eid).filter(([, g]) => g.year === o.year && (g.dateId || '') === o.dt.id && g.status !== 'idea').map(([, g]) => g.title);
+    const what = [o.dt.label, ageText(o.dt, o.year)].filter(Boolean).join(', ');
+    const r1 = addDays(o.date, -lead), r2 = addDays(o.date, -1);
+    if (r1 >= td) out.push({d: r1, t: `${o.dt.icon} In ${lead} Tagen: ${o.e.name} (${what})`, b: got.length ? `Schon besorgt: ${got.join(', ')}` : 'Noch nichts besorgt – schau in deine Ideen.'});
+    if (!got.length && lead > 1 && r2 >= td) out.push({d: r2, t: `${o.dt.icon} Morgen: ${o.e.name} (${what})`, b: 'Noch kein Geschenk eingetragen.'});
+  }
+  return out;
+}
+// Verschlüsseln für das Erinnerungs-Skript: ECDH mit dem öffentlichen VAPID-Schlüssel, daraus ein AES-GCM-Schlüssel
+async function sealForServer(obj){
+  const server = await crypto.subtle.importKey('raw', b64uToBytes(VAPID_PUBLIC), {name: 'ECDH', namedCurve: 'P-256'}, false, []);
+  const eph = await crypto.subtle.generateKey({name: 'ECDH', namedCurve: 'P-256'}, true, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({name: 'ECDH', public: server}, eph.privateKey, 256);
+  const key = await crypto.subtle.importKey('raw', await crypto.subtle.digest('SHA-256', bits), 'AES-GCM', false, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return {epk: b64u(await crypto.subtle.exportKey('raw', eph.publicKey)), iv: b64u(iv), ct: b64u(ct)};
+}
+let remTimer = null;
+function updatePrivateReminders(){
+  clearTimeout(remTimer);
+  remTimer = setTimeout(async () => {
+    const ref = pushRef();
+    if (!pushCfg.on || !ref) return;
+    try { await ref.update({enc: await sealForServer(privateReminders()), person: ui.me, updated: Date.now()}); } catch(e) {}
+  }, 1500);
+}
+
+function pushSectionHTML(){
+  const head = '<div class="section"><h3>🔔 Erinnerungen</h3></div>';
+  if (!pushSupported()) return head + '<p class="muted">Erinnerungen gehen nur, wenn die App über ihre Webadresse (https) in Chrome läuft bzw. von dort installiert wurde.</p>';
+  if (!sync?.family) return head + '<p class="muted">Bitte zuerst oben „Geräte verbinden“ einrichten – die Erinnerungen laufen über eure gemeinsame Datenbank.</p>';
+  if (!ui.me) return head + '<p class="muted">Erinnerungen sind persönlich. Wähle oben bei „Dieses Gerät gehört“ deinen Namen.</p>';
+  const c = pushCfg, hours = Array.from({length: 17}, (_, i) => i + 6);
+  return head + `
+    <p class="muted">Push-Nachrichten für <b>${esc(P(ui.me).name)}</b> auf dieses Gerät:<br>
+      🕯️ am Vorabend deines Türchens, im November ein Überblick über offene Türchen<br>
+      🎁 Termine aus „Meine Geschenke“ einige Tage vorher – und am Vortag nochmal, falls noch nichts besorgt ist.<br>
+      🔒 Deine privaten Termine werden verschlüsselt übertragen; die anderen können sie nicht lesen.</p>
+    <div class="row2" style="max-width:480px">
+      <label class="field" style="margin:0"><span>Uhrzeit</span><select id="pushHour">${hours.map(h => `<option value="${h}" ${c.hour === h ? 'selected' : ''}>${pad(h)}:00 Uhr</option>`).join('')}</select></label>
+      <label class="field" style="margin:0"><span>Vorlauf Termine</span><select id="pushLead">${[3, 7, 14].map(n => `<option value="${n}" ${c.lead === n ? 'selected' : ''}>${n} Tage vorher</option>`).join('')}</select></label>
+    </div>
+    <div class="syncbox" style="margin-top:14px"><span class="sdot ${c.on ? 'online' : ''}"></span>${c.on ? `Aktiv – gegen ${pad(c.hour)}:00 Uhr` : 'Ausgeschaltet'}</div>
+    <div class="actions start">
+      ${c.on ? '<button class="btn" data-action="push-on">Änderung speichern</button><button class="btn" data-action="push-off">Ausschalten</button>'
+             : '<button class="btn primary" data-action="push-on">🔔 Einschalten</button>'}
+      <button class="btn" data-action="push-test">Vorschau anzeigen</button>
+    </div>`;
+}
+function refreshPushSection(){ const s = $('#pushSection'); if (s) s.innerHTML = pushSectionHTML(); }
+async function askPermission(){
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted'){ toast('Benachrichtigungen sind für die App nicht erlaubt (Android-Einstellungen prüfen)'); return false; }
+  return true;
+}
+async function pushEnable(){
+  const hour = +($('#pushHour')?.value || pushCfg.hour), lead = +($('#pushLead')?.value || pushCfg.lead);
+  const ref = pushRef();
+  if (!ref) return toast('Gerade keine Verbindung zur Datenbank – bitte gleich nochmal versuchen');
+  if (!await askPermission()) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription() || await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64uToBytes(VAPID_PUBLIC)});
+    pushCfg = {on: true, hour, lead}; lsSet(PUSHKEY, pushCfg);
+    await ref.update({sub: sub.toJSON(), person: ui.me, hour, updated: Date.now(), enc: await sealForServer(privateReminders())});
+    refreshPushSection();
+    toast(`Eingeschaltet – gegen ${pad(hour)}:00 Uhr`);
+  } catch(e){ toast('Einschalten fehlgeschlagen: ' + e.message); }
+}
+async function pushDisable(){
+  try { const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(e) {}
+  try { await pushRef()?.remove(); } catch(e) {}
+  pushCfg.on = false; lsSet(PUSHKEY, pushCfg);
+  refreshPushSection(); toast('Erinnerungen ausgeschaltet');
+}
+async function pushTest(){
+  if (!await askPermission()) return;
+  // Was als Nächstes käme: Advent (heute/demnächst) oder der nächste private Termin
+  let msg = null;
+  for (let i = 0; i < 60 && !msg; i++) msg = buildAdvent(ui.me, addDays(today(), i))[0] || null;
+  const priv = privateReminders().sort((a, b) => a.d.localeCompare(b.d))[0];
+  if (priv && (!msg || priv.d <= today())) msg = {title: priv.t, body: priv.b};
+  msg ||= {title: '🎁 Geschenke', body: 'So sehen Erinnerungen aus. Gerade steht nichts an.'};
+  (await navigator.serviceWorker.ready).showNotification(msg.title, {body: msg.body, icon: 'icon-192.png', badge: 'badge-96.png', tag: 'preview'});
+}
+
+/* =========================================================
+   Start
+   ========================================================= */
+// Aus einer Benachrichtigung geöffnet → passende Ansicht
+const qp = new URLSearchParams(location.search);
+if (VIEWS[qp.get('view')]){ ui.view = qp.get('view'); saveUI(); }
+if (location.search) history.replaceState(null, '', location.pathname + location.hash);
+if (!storageOK) showBanner('Dieser Browser erlaubt kein dauerhaftes Speichern (privater Modus?). Änderungen gehen beim Schließen verloren.');
+render();
+setConn(connStatus);
+const joined = checkJoinLink();
+if (!state.setupDone && !joined) openSettings(true);
+if (sync) startSync();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
