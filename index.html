@@ -144,13 +144,17 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
 .date-chip{display:inline-flex;gap:6px;align-items:baseline;padding:6px 12px;border-radius:999px;background:var(--card2);font-size:13.5px;font-weight:600}
 .date-chip small{color:var(--muted);font-weight:500;font-size:12.5px}
 .det-desc{white-space:pre-wrap;background:var(--bg);border-radius:12px;padding:12px 14px;margin:10px 0}
-.drow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;border-radius:12px;background:var(--bg);margin-bottom:8px}
+.drow{display:grid;grid-template-columns:28px minmax(0,1fr) 34px;align-items:center;gap:8px;padding:8px;border-radius:12px;background:var(--bg);margin-bottom:8px}
+.dsel{grid-column:1/-1;display:flex;gap:8px;align-items:center;min-width:0}
+.field .dsel .d{flex:0 0 72px}
+.field .dsel .m{flex:1 1 auto;min-width:0}
+.dsel .calc{padding-left:36px}
 .drow .ic{font-size:20px;width:28px;text-align:center}
 .field .drow input,.field .drow select{width:auto;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);outline:none;min-width:0}
-.field .drow .lbl{flex:1 1 140px}
-.field .drow .y{width:84px}
-.drow .calc{flex:1 1 140px;color:var(--muted);font-size:14px}
-.drow .icon-btn{width:34px;height:34px;margin-left:auto}
+.field .drow .lbl{width:100%}
+.field .drow .y{flex:0 0 84px;width:84px}
+.drow .calc{color:var(--muted);font-size:14px}
+.drow .icon-btn{width:34px;height:34px}
 .chipbtn{padding:7px 12px;border-radius:999px;border:1.5px dashed var(--line);font-size:13.5px;font-weight:600;color:var(--muted)}
 .chipbtn:hover{border-color:var(--text);color:var(--text)}
 .warnmsg{background:color-mix(in srgb,#d97706 14%,var(--card));color:var(--text);border-radius:12px;padding:10px 14px;font-size:13.5px;margin-top:8px}
@@ -189,7 +193,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
 .door:active{transform:scale(.98)}
 .door b{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
 .door .dn{font-size:12.5px;font-weight:700;color:var(--solid)}
-.door small{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:auto;padding-top:4px;overflow-wrap:anywhere}
+.door small{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:auto;padding-top:4px;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
 .door .ok{position:absolute;top:14px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center}
 .door .ok svg{width:14px;height:14px}
 .door.today{outline:2.5px solid var(--text);outline-offset:-2.5px}
@@ -205,8 +209,12 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
 .lot.me{background:color-mix(in srgb,var(--a) 9%,var(--card))}
 .lot .arrow{color:var(--muted);font-weight:700}
 .lot .what{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;text-align:right;min-width:0}
-.lot .what.rolling{opacity:.55;filter:blur(.4px)}
-.lot .what.pop{animation:lotpop .35s}
+.round-what{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:750;letter-spacing:-.3px;margin:6px 0 14px}
+.round-what .sw{width:28px;height:28px}
+.round-what.rolling{opacity:.55;filter:blur(.4px)}
+.round-what.pop{animation:lotpop .35s}
+.chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chain .arrow{color:var(--muted);font-weight:700}
 @keyframes lotpop{40%{transform:scale(1.12)}}
 .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:inline-block}
 .hrow{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
@@ -215,7 +223,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
 .lchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--card2);font-size:12.5px;font-weight:600}
 .lchip .sw{width:12px;height:12px}
 .lchip i{font-style:normal;color:var(--muted)}
-.lotrow{display:grid;grid-template-columns:150px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.lotrow{display:grid;grid-template-columns:150px 1fr 1fr;gap:8px;align-items:center;margin:14px 0}
 .lotrow input{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);outline:none;min-width:0}
 @media (max-width:520px){.lotrow{grid-template-columns:1fr 1fr}.lotrow>span{grid-column:1/-1}}
 
@@ -309,6 +317,61 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
   .datenav .lbl{font-size:17px}
   .fab span{display:none}.fab{padding:0;width:60px;justify-content:center}
 }
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Handy: Dialoge kompakt, alles sauber in Zeilen und gleich breit ---------- */
+@media (max-width:560px){
+  .modal{padding:10px}
+  .sheet{padding:18px 16px 16px;border-radius:20px;max-height:calc(100vh - 20px)}
+  .sheet-head{margin-bottom:8px}
+  .sheet-head h2{font-size:19px}
+  .ent-icon{width:44px;height:44px;font-size:24px;border-radius:14px}
+  .field{margin:12px 0;gap:6px}
+  .field>span{font-size:12px}
+  .field input[type=text],.field input:not([type]),.field input[type=date],.field input[type=number],.field input[type=url],.field textarea,.field select{padding:10px 12px;font-size:15px}
+  .section{margin:18px 0 8px}
+  .section h3{font-size:13.5px}
+  .muted,.hint{font-size:13px}
+  /* Auswahl-Chips als gleichmäßiges Raster statt versetzt umbrechender Reihe */
+  .opt span{padding:8px 10px;font-size:14px;justify-content:center;text-align:center}
+  .opts.cols2,.opts.cols3,.opts.presets{display:grid;gap:6px}
+  .opts.cols2,.opts.presets{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .opts.cols3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .opts.cols2 .opt span,.opts.cols3 .opt span{height:100%}
+  .opts.cols3 .opt span{padding:8px 4px;font-size:13.5px;gap:5px;white-space:nowrap}
+  .opts.presets .chipbtn{padding:8px 6px;font-size:13px}
+  .opts.presets .chipbtn:last-child:nth-child(odd){grid-column:1/-1}
+  .opts.icons{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+  .icons .opt span{width:100%;height:auto;aspect-ratio:1;font-size:20px}
+  .swatches{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+  .swatches .opt span{width:100%;height:auto;aspect-ratio:1;border-width:2px}
+  /* Umschalter über die volle Breite, Beschriftung ohne Umbruch */
+  .sheet .seg-switch{display:flex;width:100%;flex-wrap:nowrap}
+  .sheet .seg-switch button{flex:1;padding:8px 4px;font-size:13.5px;white-space:nowrap}
+  .sheet .seg-switch.owner button{padding:9px 4px;font-size:14px}
+  /* Knöpfe in Dialogen: volle Breite untereinander, Hauptknopf oben */
+  .sheet .actions{flex-direction:column;align-items:stretch;gap:8px;margin-top:16px}
+  .sheet .actions:has(> .btn.primary:last-child){flex-direction:column-reverse}
+  .sheet .actions .btn{width:100%;margin:0!important;padding:11px 16px}
+  .sheet .actions.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sheet .actions.tiles .btn{padding:10px 4px;font-size:14px}
+  .row2.keep{grid-template-columns:1fr 1fr}
+  /* Termine in der Personen-Ansicht als saubere Liste */
+  .dates{flex-direction:column;align-items:stretch;gap:5px}
+  .date-chip{border-radius:12px;padding:7px 12px;justify-content:space-between;gap:10px}
+  .date-chip small{text-align:right}
+  .year-head{margin:16px 0 6px}
+  .gift{padding:9px 12px}
+  .empty .btn{display:block;width:100%;max-width:300px;margin:10px auto 0}
+  .btnrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .btnrow .mini{padding:8px 4px;font-size:12.5px}
+  .lotrow{margin:12px 0}
+  /* Filter (Alle + drei Personen) gleichmäßig in einer Zeile */
+  .filter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .filter button{justify-content:center;padding:7px 4px;font-size:13px;gap:5px;white-space:nowrap}
+  .filter .dot{width:8px;height:8px}
+}
+@media (max-width:380px){ .filter .dot{display:none} }
 </style>
 </head>
 <body>
@@ -403,7 +466,7 @@ function loadData(key, def){
 let state = loadData(KEY, defaultState);
 let mine = loadData(MINEKEY, defaultMine);
 let ui = Object.assign({view:'mine', sub:'next', theme:'auto', me:'', advFilter:'', wishTab:''}, (() => { try { return JSON.parse(localStorage.getItem(UIKEY)) || {}; } catch(e) { return {}; } })());
-ui.advYear = ui.wYear = new Date().getFullYear();
+ui.advYear = Math.max(2026, ui.wYear = new Date().getFullYear());   // Adventskalender beginnt 2026
 ui.cursor = today();
 
 function storeLocal(key, data){
@@ -449,6 +512,7 @@ const RULES = {
 const PRESETS = [
   {label:'Geburtstag',   icon:'🎂', rule:'fixed'},
   {label:'Weihnachten',  icon:'🎄', rule:'fixed', m:12, d:24},
+  {label:'Neujahr',      icon:'🎆', rule:'fixed', m:1,  d:1},
   {label:'Muttertag',    icon:'💐', rule:'muttertag'},
   {label:'Vatertag',     icon:'👔', rule:'vatertag'},
   {label:'Ostern',       icon:'🐣', rule:'ostern'},
@@ -457,7 +521,7 @@ const PRESETS = [
   {label:'Nikolaus',     icon:'🎅', rule:'fixed', m:12, d:6},
   {label:'',             icon:'⭐', rule:'fixed', custom:true, name:'Eigener Termin'},
 ];
-const ICONS = ['👤','👩','👨','👵','👴','👧','👦','👶','💑','👪','🐶','📅','🎄','⭐'];
+const ICONS = ['👤','👩','👨','👵','👴','👧','👦','👶','💑','👪','🐱','📅','🎄','⭐'];
 const STATUS = {
   idea:   {icon:'💡', name:'Idee'},
   bought: {icon:'🛍️', name:'Besorgt'},
@@ -522,7 +586,7 @@ const TABS = [
   ['wishes',  'Wünsche',         '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'],
 ];
 const VIEWS = {mine: renderMine, advent: renderAdvent, wichtel: renderWichtel, wishes: renderWishes};
-const fabLabel = () => ({mine: 'Person / Anlass', wishes: ui.me && wishTab() === ui.me ? 'Wunsch' : ''})[ui.view] || '';
+const fabLabel = () => ({mine: 'Neue Person', wishes: ui.me && wishTab() === ui.me ? 'Wunsch' : ''})[ui.view] || '';
 
 let animUntil = 0, renderLater = null;
 function render(){
@@ -550,9 +614,10 @@ const avatar = k => `<span class="avatar who-${k}" ${pStyle(k)} title="${esc(P(k
 const mod = (a, n) => ((a % n) + n) % n;
 const yKey = y => 'y' + y;   // Jahres-Schlüssel mit Buchstaben, damit Firebase daraus keine Liste macht
 const ownerHTML = () => `<div class="seg-switch owner">${PK.map(k => `<button class="who-${k} ${ui.me === k ? 'active' : ''}" ${pStyle(k)} data-action="me" data-k="${k}">${esc(P(k).name)}</button>`).join('')}</div>`;
-function yearNav(label, y){
+const ADVENT_FIRST = 2026;   // der Adventskalender beginnt 2026 – frühere Jahre gibt es nicht
+function yearNav(label, y, min){
   return `<div class="datenav">
-    <button class="round" data-action="yprev" aria-label="Jahr zurück">${ICON_L}</button>
+    ${min && y <= min ? '' : `<button class="round" data-action="yprev" aria-label="Jahr zurück">${ICON_L}</button>`}
     <button class="round" data-action="ynext" aria-label="Jahr vor">${ICON_R}</button>
     <span class="lbl">${label}</span>
     ${y === thisYear() ? '' : '<button class="pill-btn" data-action="ynow">Dieses Jahr</button>'}</div>`;
@@ -594,7 +659,7 @@ function buildAdvent(p, td){
 function renderAdvent(v){
   const y = ui.advYear, td = today();
   const filter = `<div class="filter">${['', ...PK].map(k => `<button class="${ui.advFilter === k ? 'active' : ''}" data-action="advfilter" data-f="${k}">${k ? `<span class="dot" style="background:${P(k).color}"></span>${esc(P(k).name)}` : 'Alle'}</button>`).join('')}</div>`;
-  $('#toolbar').innerHTML = yearNav(`🕯️ Adventskalender ${y}`, y) + filter;
+  $('#toolbar').innerHTML = yearNav(`🕯️ Adventskalender ${y}`, y, ADVENT_FIRST) + filter;
   const days = Array.from({length: 24}, (_, i) => ({d: i + 1, who: adventWho(y, i + 1), ...adventDoc(y, i + 1)}));
   const pills = PK.map(k => {
     const mineDays = days.filter(x => x.who === k), done = mineDays.filter(x => x.done).length;
@@ -624,53 +689,58 @@ function renderAdvent(v){
 }
 
 /* ---------- Wichteln ---------- */
-// Jedes Jahr zwei Runden im Kreis – einmal in jede Richtung. So schenkt jede Person zweimal und bekommt zweimal.
-// Schlüssel eines Loses: Schenkende + Beschenkte, z. B. 'ab' = Person a beschenkt Person b.
-const ROUNDS = [{name: 'Runde 1', lots: ['ab', 'bc', 'ca']}, {name: 'Runde 2', lots: ['ac', 'cb', 'ba']}];
-const LOTS = ROUNDS.flatMap(r => r.lots);
+// Jedes Jahr zwei Runden im Kreis – einmal in jede Richtung. Pro Runde wird EIN Los gezogen (Farbe + Kategorie),
+// das für alle drei Geschenke dieser Runde gilt. So schenkt jede Person zweimal und bekommt zweimal.
+const ROUNDS = [{id: 'r1', name: 'Runde 1', order: ['a', 'b', 'c']}, {id: 'r2', name: 'Runde 2', order: ['a', 'c', 'b']}];
+const nextIn = (r, k) => r.order[(r.order.indexOf(k) + 1) % 3];   // wen k in dieser Runde beschenkt
+const prevIn = (r, k) => r.order[(r.order.indexOf(k) + 2) % 3];   // von wem k in dieser Runde beschenkt wird
 const WCOLORS = {Rot:'#ef4444', Blau:'#3b82f6', Grün:'#22c55e', Gelb:'#facc15', Orange:'#f97316', Lila:'#a855f7', Rosa:'#f9a8d4', Pink:'#ec4899',
   Türkis:'#14b8a6', Braun:'#92400e', Schwarz:'#111827', Weiß:'#ffffff', Grau:'#9ca3af', Gold:'#d4a017', Silber:'#c0c0c0', Beige:'#e7d7b9',
   Bunt:'conic-gradient(#ef4444,#facc15,#22c55e,#3b82f6,#a855f7,#ef4444)'};
-const DEF_CATS = ['Küche', 'Bad', 'Garten', 'Wohnen', 'Freizeit', 'Lesen', 'Wellness', 'Kleidung', 'Essen & Trinken', 'Technik', 'Sport', 'Reisen', 'Basteln', 'Büro'];
+const DEF_CATS = ['tierisch', 'kuschelig', 'nachhaltig', 'retro', 'glitzernd', 'duftend', 'essbar', 'selbstgemacht', 'verspielt',
+  'nostalgisch', 'gemütlich', 'sportlich', 'mini', 'leuchtend', 'aus Holz', 'musikalisch', 'regional', 'flauschig', 'für draußen',
+  'überraschend', 'praktisch', 'luxuriös', 'wärmend', 'erfrischend', 'exotisch', 'zum Lesen', 'zum Spielen', 'fürs Bad', 'für die Küche'];
 const wColors = () => state.settings.wColors?.length ? state.settings.wColors : Object.keys(WCOLORS).filter(c => c !== 'Bunt');
 const wCats = () => state.settings.wCats?.length ? state.settings.wCats : DEF_CATS;
 const swatch = c => `<span class="sw" style="background:${WCOLORS[c] || 'var(--card2)'}"></span>`;
 const lotWhat = l => `${swatch(l.color)}${esc(l.color)} · ${esc(l.cat)}`;
+const lotText = l => l ? `${l.color} · ${l.cat}` : '?';
 const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-// Zufällige Farben und Kategorien – möglichst alle verschieden, ohne Kombinationen aus früheren Jahren
-// und ohne dieselbe Farbe/Kategorie wie im Vorjahr für dasselbe Paar
+// Zwei Lose mit verschiedenen Farben und Kategorien – ohne Kombinationen aus früheren Jahren
+// und möglichst ohne Farben/Kategorien des Vorjahres
 function drawLots(y){
   const colors = wColors(), cats = wCats();
-  const used = new Set(Object.entries(state.wichtel).filter(([k]) => k !== yKey(y)).flatMap(([, w]) => Object.values(w.lots || {}).map(l => l.color + '|' + l.cat)));
-  const prev = state.wichtel[yKey(y - 1)]?.lots || {};
+  const other = Object.entries(state.wichtel).filter(([k]) => k !== yKey(y)).flatMap(([, w]) => Object.values(w.rounds || {}));
+  const used = new Set(other.map(l => l.color + '|' + l.cat));
+  const prev = Object.values(state.wichtel[yKey(y - 1)]?.rounds || {});
   let best = null, bestScore = Infinity;
   for (let t = 0; t < 400 && bestScore > 0; t++){
-    const cs = shuffle(colors), ks = shuffle(cats), lots = {};
+    const cs = shuffle(colors), ks = shuffle(cats), rounds = {};
     let score = 0;
-    LOTS.forEach((k, i) => {
+    ROUNDS.forEach((r, i) => {
       const l = {color: cs[i % cs.length], cat: ks[i % ks.length]};
       if (used.has(l.color + '|' + l.cat)) score += 10;
-      if (prev[k] && (prev[k].color === l.color || prev[k].cat === l.cat)) score += 1;
-      lots[k] = l;
+      if (prev.some(p => p.color === l.color || p.cat === l.cat)) score += 1;
+      rounds[r.id] = l;
     });
-    if (score < bestScore){ best = lots; bestScore = score; }
+    if (score < bestScore){ best = rounds; bestScore = score; }
   }
   return best;
 }
 function doDraw(){
   const y = ui.wYear, old = state.wichtel[yKey(y)];
   if (old && !confirm(`Für ${y} neu auslosen? Das bisherige Ergebnis wird für alle ersetzt.`)) return;
-  state.wichtel[yKey(y)] = {lots: drawLots(y), drawnAt: Date.now(), by: ui.me || null};
+  state.wichtel[yKey(y)] = {rounds: drawLots(y), drawnAt: Date.now(), by: ui.me || null};
   save(); render();
 }
 // Rollende Anzeige beim Auslosen – auch auf den Geräten der anderen, wenn sie die App gerade offen haben
 function animateLots(root){
-  const els = [...root.querySelectorAll('.lot .what')], colors = wColors(), cats = wCats();
-  animUntil = Date.now() + 900 + els.length * 350 + 100;
+  const els = [...root.querySelectorAll('.round-what')], colors = wColors(), cats = wCats();
+  animUntil = Date.now() + 1400 + els.length * 700 + 100;
   els.forEach((el, i) => {
-    const final = el.innerHTML, stop = Date.now() + 900 + i * 350;
+    const final = el.innerHTML, stop = Date.now() + 1400 + i * 700;
     el.classList.add('rolling');
     const t = setInterval(() => {
       if (Date.now() < stop){ el.innerHTML = lotWhat({color: colors[rnd(colors.length)], cat: cats[rnd(cats.length)]}); return; }
@@ -681,27 +751,30 @@ function animateLots(root){
 
 function renderWichtel(v){
   const y = ui.wYear, w = state.wichtel[yKey(y)];
-  $('#toolbar').innerHTML = yearNav(`🎲 Wichteln ${y}`, y) + `<button class="pill-btn" data-action="pools" style="margin-left:auto">⚙️ Farben & Kategorien</button>`;
-  const lotRow = k => `<div class="lot ${k[0] === ui.me ? 'me' : ''}">${avatar(k[0])}<span class="arrow">→</span>${avatar(k[1])}
-      <span>${esc(P(k[1]).name)}</span><span class="what">${lotWhat(w.lots[k] || {color:'?', cat:'?'})}</span></div>`;
+  $('#toolbar').innerHTML = yearNav(`🎲 Wichteln ${y}`, y);
+  // Kreis einer Runde: Ni → J → Na → Ni
+  const chain = r => [...r.order, r.order[0]].map(avatar).join('<span class="arrow">→</span>');
   let html = '';
   if (!w){
     html = `<div class="empty"><span class="big">🎲</span>Für ${y} ist noch nichts gelost.<br>
-      <button class="btn primary" data-action="draw">🎲 Jetzt auslosen</button> <button class="btn" data-action="lots-edit">✏️ Von Hand eintragen</button></div>`;
+      <button class="btn primary" data-action="draw">🎲 Jetzt auslosen</button> <button class="btn" data-action="lots-edit">✏️ Von Hand eintragen</button>
+      <br><button class="mini" data-action="pools" style="margin-top:14px">⚙️ Farben & Kategorien</button></div>`;
   } else {
+    const rd = r => w.rounds?.[r.id];
     if (ui.me){
-      const give = LOTS.filter(k => k[0] === ui.me), get = LOTS.filter(k => k[1] === ui.me);
-      html += `<div class="info-card hl" style="margin-top:0"><span style="font-size:24px">🎁</span><div class="txt">Du beschenkst ${give.map(k => `${esc(P(k[1]).name)}: ${esc(w.lots[k]?.color)} · ${esc(w.lots[k]?.cat)}`).join(' und ')}
-        <small>Du bekommst: ${get.map(k => `${esc(w.lots[k]?.color)} · ${esc(w.lots[k]?.cat)} von ${esc(P(k[0]).name)}`).join(', ')}</small></div></div><div style="height:12px"></div>`;
+      html += `<div class="info-card hl" style="margin-top:0"><span style="font-size:24px">🎁</span><div class="txt">Du beschenkst ${ROUNDS.map(r => `${esc(P(nextIn(r, ui.me)).name)} mit ${esc(lotText(rd(r)))}`).join(' und ')}
+        <small>Du bekommst ${ROUNDS.map(r => `${esc(lotText(rd(r)))} von ${esc(P(prevIn(r, ui.me)).name)}`).join(' und ')}</small></div></div><div style="height:12px"></div>`;
     }
-    html += `<div class="lots">${ROUNDS.map(r => `<div class="card"><h4>${r.name}</h4>${r.lots.map(lotRow).join('')}</div>`).join('')}</div>
-      <div class="actions start" style="margin-top:12px">
-        <span class="muted" style="margin:0 auto 0 0;align-self:center">${w.drawnAt ? `Gelost am ${esc(new Date(w.drawnAt).toLocaleDateString('de-DE'))}${w.by ? ' von ' + esc(P(w.by).name) : ''}` : 'Von Hand eingetragen'}</span>
-        <button class="mini" data-action="lots-edit">✏️ Bearbeiten</button><button class="mini" data-action="draw">🎲 Neu auslosen</button></div>`;
+    html += `<div class="lots">${ROUNDS.map(r => `<div class="card"><h4>${r.name}</h4>
+        <div class="round-what">${rd(r) ? lotWhat(rd(r)) : '–'}</div>
+        <div class="chain">${chain(r)}</div>
+        <small class="muted" style="display:block;margin:8px 0 0">${r.order.map(k => `${esc(P(k).name)} → ${esc(P(nextIn(r, k)).name)}`).join(' · ')}</small></div>`).join('')}</div>
+      <p class="muted" style="margin:12px 0 8px">${w.drawnAt ? `Gelost am ${esc(new Date(w.drawnAt).toLocaleDateString('de-DE'))}${w.by ? ' von ' + esc(P(w.by).name) : ''}` : 'Von Hand eingetragen'}</p>
+      <div class="btnrow"><button class="mini" data-action="lots-edit">✏️ Bearbeiten</button><button class="mini" data-action="draw">🎲 Neu auslosen</button><button class="mini" data-action="pools">⚙️ Farben & Kategorien</button></div>`;
   }
   const years = Object.keys(state.wichtel).map(k => +k.slice(1)).filter(x => x !== y).sort((a, b) => b - a);
   html += `<div class="section"><h3>Alle Jahre</h3><span class="count">${years.length ? 'zum Öffnen antippen' : ''}</span></div>` + (years.length
-    ? `<div class="list">${years.map(x => `<div class="hrow" data-action="wyear" data-y="${x}"><b>${x}</b><div class="hchips">${LOTS.map(k => { const l = state.wichtel[yKey(x)].lots?.[k]; return l ? `<span class="lchip"><i>${esc(short(k[0]))}→${esc(short(k[1]))}</i>${swatch(l.color)}${esc(l.color)} · ${esc(l.cat)}</span>` : ''; }).join('')}</div></div>`).join('')}</div>`
+    ? `<div class="list">${years.map(x => `<div class="hrow" data-action="wyear" data-y="${x}"><b>${x}</b><div class="hchips">${ROUNDS.map(r => { const l = state.wichtel[yKey(x)].rounds?.[r.id]; return l ? `<span class="lchip"><i>${r.name}</i>${swatch(l.color)}${esc(l.color)} · ${esc(l.cat)}</span>` : ''; }).join('')}</div></div>`).join('')}</div>`
     : '<div class="empty small">Frühere Jahre kannst du über ‹ › auswählen und dort von Hand eintragen.</div>');
   v.innerHTML = html;
   // Neues Ergebnis (von hier oder einem anderen Gerät) einmal rollend aufdecken
@@ -759,8 +832,8 @@ function renderMine(v){
   $('#toolbar').innerHTML = nav + seg;
 
   if (!Object.keys(mine.entries).length && !giftList().length){
-    v.innerHTML = `<div class="empty"><span class="big">🎁</span>Lege Personen und Anlässe an, die du beschenkst – mit Geburtstag, Weihnachten, Muttertag …<br>
-      Alles hier sehen nur deine eigenen Geräte.<br><button class="btn primary" data-action="new">＋ Person / Anlass anlegen</button></div>`;
+    v.innerHTML = `<div class="empty"><span class="big">🎁</span>Lege die Personen an, die du beschenkst – mit Geburtstag, Weihnachten, Muttertag …<br>
+      Alles hier sehen nur deine eigenen Geräte.<br><button class="btn primary" data-action="new">＋ Neue Person</button></div>`;
     return;
   }
   ({next: renderNext, cal: renderCal, all: renderAll})[ui.sub](v);
@@ -825,14 +898,12 @@ function renderCal(v){
 }
 
 function renderAll(v){
-  const rows = kind => Object.entries(mine.entries).filter(([, e]) => e.kind === kind).sort((a, b) => byName(a[1].name, b[1].name)).map(([eid, e]) => {
+  const rows = Object.entries(mine.entries).sort((a, b) => byName(a[1].name, b[1].name)).map(([eid, e]) => {
     const nx = nextOcc(e), n = giftsOf(eid).filter(([, g]) => g.status !== 'idea').length;
     const info = [nx ? `${nx.dt.icon} ${nx.dt.label} ${relDays(nx.date)}` : 'kein Termin', n ? `${n} Geschenk${n > 1 ? 'e' : ''}` : ''].filter(Boolean).join(' · ');
     return `<div class="prow" data-action="entry" data-id="${eid}"><span class="ic">${e.icon}</span><div class="main"><b>${esc(e.name)}</b><small>${esc(info)}</small></div></div>`;
   });
-  const people = rows('person'), events = rows('event');
-  v.innerHTML = (people.length ? `<div class="section"><h3>👤 Personen</h3><span class="count">${people.length}</span></div><div class="list">${people.join('')}</div>` : '')
-    + (events.length ? `<div class="section"><h3>📅 Anlässe</h3><span class="count">${events.length}</span></div><div class="list">${events.join('')}</div>` : '');
+  v.innerHTML = `<div class="section"><h3>👤 Alle Personen</h3><span class="count">${rows.length}</span></div><div class="list">${rows.join('')}</div>`;
 }
 
 /* =========================================================
@@ -877,7 +948,7 @@ function opt(name, value, label, checked, cls = '', type = 'radio'){
 }
 const focusFine = el => { if (el && matchMedia('(pointer: fine)').matches) setTimeout(() => el.focus(), 50); };
 
-/* ---------- Person / Anlass: Ansicht mit Zeitleiste ---------- */
+/* ---------- Person: Ansicht mit Zeitleiste ---------- */
 function openEntry(eid){
   const e = mine.entries[eid];
   if (!e){ hideModal(); return; }
@@ -897,7 +968,7 @@ function openEntry(eid){
     <div class="sheet-head"><div class="ent-head"><span class="ent-icon">${e.icon}</span><h2>${esc(e.name)}</h2></div><button class="icon-btn" data-action="close">✕</button></div>
     <div class="dates">${(e.dates || []).map(dt => { const n = nextOf(dt); return `<span class="date-chip">${dt.icon} ${esc(dt.label)} <small>${esc(dateText(dt))} · ${esc([ageText(dt, n.year), relDays(n.date)].filter(Boolean).join(', '))}</small></span>`; }).join('') || '<span class="muted">Kein Termin hinterlegt</span>'}</div>
     ${e.note ? `<div class="det-desc">${esc(e.note)}</div>` : ''}
-    <div class="actions start">
+    <div class="actions start tiles">
       <button class="btn primary" data-action="gift-new" data-eid="${eid}">＋ Geschenk</button>
       <button class="btn" data-action="idea" data-eid="${eid}">💡 Idee</button>
       <button class="btn" data-action="entry-edit" data-id="${eid}">✏️ Bearbeiten</button>
@@ -906,10 +977,10 @@ function openEntry(eid){
     ${years.map(yearHTML).join('')}`);
 }
 
-/* ---------- Person / Anlass anlegen / bearbeiten ---------- */
+/* ---------- Person anlegen / bearbeiten ---------- */
 function openEntryForm(eid){
   const e = eid ? mine.entries[eid] : null;
-  const draft = e ? JSON.parse(JSON.stringify(e)) : {name:'', kind:'person', icon:'👤', dates:[], note:''};
+  const draft = e ? JSON.parse(JSON.stringify(e)) : {name:'', icon:'👤', dates:[], note:''};
   draft.dates = draft.dates || [];
   const icons = ICONS.includes(draft.icon) ? ICONS : [draft.icon, ...ICONS];
   const dayOpts = sel => Array.from({length:31}, (_, i) => `<option value="${i+1}" ${sel === i+1 ? 'selected' : ''}>${i+1}.</option>`).join('');
@@ -917,24 +988,21 @@ function openEntryForm(eid){
   const datesHTML = () => draft.dates.length ? draft.dates.map((dt, i) => `<div class="drow" data-i="${i}">
       <span class="ic">${dt.icon}</span>
       <input class="lbl" value="${esc(dt.label)}" maxlength="30" placeholder="Bezeichnung" aria-label="Bezeichnung">
-      ${dt.rule === 'fixed'
+      <button type="button" class="icon-btn" data-rm="${i}" aria-label="Termin entfernen">✕</button>
+      <div class="dsel">${dt.rule === 'fixed'
         ? `<select class="d" aria-label="Tag">${dayOpts(dt.d)}</select><select class="m" aria-label="Monat">${monOpts(dt.m)}</select>
            <input class="y" type="number" min="1900" max="2100" placeholder="Jahr" value="${dt.y || ''}" title="Geburtsjahr bzw. „seit“ – optional, für das Alter">`
-        : `<span class="calc">📆 ${RULES[dt.rule].name}</span>`}
-      <button type="button" class="icon-btn" data-rm="${i}" aria-label="Termin entfernen">✕</button></div>`).join('')
+        : `<span class="calc">📆 ${RULES[dt.rule].name}</span>`}</div></div>`).join('')
     : '<p class="muted">Noch kein Termin – unten auswählen.</p>';
 
   openModal(`
-    <div class="sheet-head"><h2>${e ? 'Bearbeiten' : 'Person / Anlass anlegen'}</h2><button class="icon-btn" data-action="${e ? 'entry' : 'close'}" data-id="${eid || ''}">✕</button></div>
+    <div class="sheet-head"><h2>${e ? 'Bearbeiten' : 'Neue Person'}</h2><button class="icon-btn" data-action="${e ? 'entry' : 'close'}" data-id="${eid || ''}">✕</button></div>
     <form id="entryForm" autocomplete="off">
-      <div class="field"><span>Art</span><div class="opts">
-        ${opt('kind', 'person', '👤 Person', draft.kind === 'person')}${opt('kind', 'event', '📅 Anlass', draft.kind === 'event')}
-      </div></div>
-      <label class="field"><span>Name</span><input name="name" maxlength="40" value="${esc(draft.name)}" placeholder="z. B. Mama, Oma Inge, Silvester-Party" required></label>
+      <label class="field"><span>Name</span><input name="name" maxlength="40" value="${esc(draft.name)}" placeholder="z. B. Mama" required></label>
       <div class="field"><span>Symbol</span><div class="opts icons">${icons.map(i => opt('icon', i, i, draft.icon === i)).join('')}</div></div>
       <div class="field"><span>Jährliche Termine</span>
         <div id="dates">${datesHTML()}</div>
-        <div class="opts">${PRESETS.map((p, i) => `<button type="button" class="chipbtn" data-preset="${i}">＋ ${p.icon} ${p.name || p.label}</button>`).join('')}</div>
+        <div class="opts presets">${PRESETS.map((p, i) => `<button type="button" class="chipbtn" data-preset="${i}">＋ ${p.icon} ${p.name || p.label}</button>`).join('')}</div>
         <small>Muttertag, Vatertag und Ostern berechnet die App jedes Jahr selbst. Mit Jahr (z. B. Geburtsjahr) zeigt sie das Alter an.</small>
       </div>
       <label class="field"><span>Notiz <em>(optional)</em></span><textarea name="note" rows="3" placeholder="Größen, Hobbys, Wünsche, „hat schon“ …">${esc(draft.note)}</textarea></label>
@@ -965,17 +1033,11 @@ function openEntryForm(eid){
         }
         if (rm){ read(); draft.dates.splice(+rm.dataset.rm, 1); redraw(); }
       });
-      // Art wechseln: passendes Standard-Symbol, solange keins bewusst gewählt wurde
-      form.addEventListener('change', ev => {
-        if (ev.target.name !== 'kind') return;
-        const ic = form.querySelector('[name=icon]:checked');
-        if (ic && ['👤', '📅'].includes(ic.value)) form.querySelector(`[name=icon][value="${ev.target.value === 'person' ? '👤' : '📅'}"]`).checked = true;
-      });
       form.addEventListener('submit', ev => {
         ev.preventDefault(); read();
         const id = eid || uid();
         mine.entries[id] = {
-          name: form.name.value.trim(), kind: form.querySelector('[name=kind]:checked').value,
+          name: form.name.value.trim(),
           icon: form.querySelector('[name=icon]:checked')?.value || '👤', note: form.note.value.trim(),
           dates: draft.dates.map(dt => ({...dt, label: dt.label || 'Termin'})), created: e?.created || Date.now(),
         };
@@ -1011,11 +1073,11 @@ function openGiftForm(gid, pre = {}){
         <option value="">– noch offen –</option>
         ${entries.map(([id, e]) => `<option value="${id}" ${g.eid === id ? 'selected' : ''}>${e.icon} ${esc(e.name)}</option>`).join('')}
       </select></label>
-      <div class="field" id="occField"><span>Anlass</span><div class="opts" id="occOpts"></div></div>
-      <div class="field"><span>Stand</span><div class="opts">
+      <div class="field" id="occField"><span>Anlass</span><div class="opts cols2" id="occOpts"></div></div>
+      <div class="field"><span>Stand</span><div class="opts cols3">
         ${Object.entries(STATUS).map(([k, s]) => opt('status', k, `${s.icon} ${s.name}`, g.status === k)).join('')}
       </div></div>
-      <div class="row2">
+      <div class="row2 keep">
         <label class="field"><span>Jahr</span><input type="number" name="year" min="1950" max="2100" value="${g.year ?? ''}" placeholder="irgendwann"><small id="yearHint"></small></label>
         <label class="field"><span>Preis in € <em>(optional)</em></span><input type="number" name="price" min="0" step="0.01" value="${g.price ?? ''}"></label>
       </div>
@@ -1103,7 +1165,7 @@ function openIdea(eid){
     <p class="muted">Schnell notieren, bevor sie weg ist. Nur du siehst sie.</p>
     <form id="ideaForm" autocomplete="off">
       <label class="field"><span>Idee</span><input name="text" maxlength="80" placeholder="z. B. Mama mag den Tee aus dem Urlaub" required></label>
-      <div class="field"><span>Für wen? <em>(optional)</em></span><div class="opts">
+      <div class="field"><span>Für wen? <em>(optional)</em></span><div class="opts cols2">
         ${opt('eid', '', '– später –', !eid)}${people.map(([id, e]) => opt('eid', id, `${e.icon} ${esc(e.name)}`, eid === id)).join('')}
       </div></div>
       <div class="actions"><button type="button" class="btn" data-action="${eid ? 'entry' : 'close'}" data-id="${eid || ''}">Abbrechen</button><button type="submit" class="btn primary">Merken</button></div>
@@ -1130,7 +1192,7 @@ function openDoor(d){
     <div class="sheet-head"><h2>🕯️ Türchen ${d}</h2><button class="icon-btn" data-action="close">✕</button></div>
     <p class="muted">${esc(fmt(`${y}-12-${pad(d)}`, {weekday:'long', day:'numeric', month:'long', year:'numeric'}))}</p>
     <form id="doorForm" autocomplete="off">
-      <div class="field"><span>Wer ist dran?</span><div class="opts">${PK.map(k => whoOpt('who', k, adventWho(y, d) === k)).join('')}</div>
+      <div class="field"><span>Wer ist dran?</span><div class="opts cols3">${PK.map(k => whoOpt('who', k, adventWho(y, d) === k)).join('')}</div>
         <small>Laut Verteilung: ${esc(P(plan).name)}. Zum Tauschen einfach die andere Person wählen.</small></div>
       <label class="field"><span>Was gibt es?</span><input name="text" maxlength="80" value="${esc(doc.text)}" placeholder="z. B. Lieblingsschokolade"></label>
       <div id="simMsg"></div>
@@ -1164,7 +1226,7 @@ function openAdventStart(){
   openModal(`
     <div class="sheet-head"><h2>Verteilung ${y}</h2><button class="icon-btn" data-action="close">✕</button></div>
     <p class="muted">Wer bekommt Türchen 1? Danach geht es reihum weiter. In den Folgejahren rückt der Start automatisch eine Person weiter.</p>
-    <form><div class="opts">${PK.map(k => whoOpt('start', k, cur === k)).join('')}</div>
+    <form><div class="opts cols3">${PK.map(k => whoOpt('start', k, cur === k)).join('')}</div>
     <div class="hint">Einzeln getauschte Türchen (⇄) bleiben bei ihrer Person.</div>
     <div class="actions"><button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div></form>`, sheet => {
       sheet.querySelector('form').addEventListener('submit', ev => {
@@ -1179,13 +1241,13 @@ function openAdventStart(){
 function openLotsForm(){
   const y = ui.wYear, w = state.wichtel[yKey(y)];
   // Vorschläge: Lostopf plus alles, was in früheren Jahren schon vorkam
-  const known = (pool, f) => [...new Set([...pool, ...Object.values(state.wichtel).flatMap(x => Object.values(x.lots || {}).map(l => l[f]))])];
+  const known = (pool, f) => [...new Set([...pool, ...Object.values(state.wichtel).flatMap(x => Object.values(x.rounds || {}).map(l => l[f]))])];
   openModal(`
     <div class="sheet-head"><h2>🎲 Wichteln ${y} eintragen</h2><button class="icon-btn" data-action="close">✕</button></div>
     <p class="muted">Zum Nachtragen früherer Jahre oder wenn ihr ohne App gelost habt.</p>
     <form autocomplete="off">
-      ${ROUNDS.map(r => `<div class="section" style="margin-top:12px"><h3>${r.name}</h3></div>${r.lots.map(k => `<div class="lotrow"><span>${esc(P(k[0]).name)} → ${esc(P(k[1]).name)}</span>
-        <input name="c_${k}" list="wcol" placeholder="Farbe" value="${esc(w?.lots?.[k]?.color)}"><input name="k_${k}" list="wcat" placeholder="Kategorie" value="${esc(w?.lots?.[k]?.cat)}"></div>`).join('')}`).join('')}
+      ${ROUNDS.map(r => `<div class="lotrow"><span><b>${r.name}</b><br><small class="muted">${r.order.map(k => esc(short(k))).join(' → ')} → ${esc(short(r.order[0]))}</small></span>
+        <input name="c_${r.id}" list="wcol" placeholder="Farbe" value="${esc(w?.rounds?.[r.id]?.color)}"><input name="k_${r.id}" list="wcat" placeholder="Kategorie" value="${esc(w?.rounds?.[r.id]?.cat)}"></div>`).join('')}
       <datalist id="wcol">${known(wColors(), 'color').map(c => `<option value="${esc(c)}">`).join('')}</datalist>
       <datalist id="wcat">${known(wCats(), 'cat').map(c => `<option value="${esc(c)}">`).join('')}</datalist>
       <div class="actions stack rev">
@@ -1195,10 +1257,10 @@ function openLotsForm(){
       const form = sheet.querySelector('form');
       form.addEventListener('submit', ev => {
         ev.preventDefault();
-        const lots = {};
-        LOTS.forEach(k => { const c = form['c_' + k].value.trim(), t = form['k_' + k].value.trim(); if (c || t) lots[k] = {color: c || '?', cat: t || '?'}; });
-        if (!Object.keys(lots).length){ toast('Bitte mindestens ein Los eintragen'); return; }
-        state.wichtel[yKey(y)] = {lots, drawnAt: null, by: ui.me || null, at: Date.now()};
+        const rounds = {};
+        ROUNDS.forEach(r => { const c = form['c_' + r.id].value.trim(), t = form['k_' + r.id].value.trim(); if (c || t) rounds[r.id] = {color: c || '?', cat: t || '?'}; });
+        if (!Object.keys(rounds).length){ toast('Bitte mindestens ein Los eintragen'); return; }
+        state.wichtel[yKey(y)] = {rounds, drawnAt: null, by: ui.me || null, at: Date.now()};
         save(); hideModal(); render(); toast('Gespeichert');
       });
       sheet.querySelector('#lotsDel')?.addEventListener('click', () => {
@@ -1368,6 +1430,7 @@ document.addEventListener('click', e => {
     case 'yprev': case 'ynext': case 'ynow': {
       const f = ui.view === 'advent' ? 'advYear' : 'wYear';
       ui[f] = el.dataset.action === 'ynow' ? thisYear() : ui[f] + (el.dataset.action === 'ynext' ? 1 : -1);
+      if (f === 'advYear') ui[f] = Math.max(ADVENT_FIRST, ui[f]);
       render(); break;
     }
     case 'advfilter':  ui.advFilter = el.dataset.f; saveUI(); render(); break;
@@ -1831,7 +1894,7 @@ function pushSectionHTML(){
       🕯️ am Vorabend deines Türchens, im November ein Überblick über offene Türchen<br>
       🎁 Termine aus „Meine Geschenke“ einige Tage vorher – und am Vortag nochmal, falls noch nichts besorgt ist.<br>
       🔒 Deine privaten Termine werden verschlüsselt übertragen; die anderen können sie nicht lesen.</p>
-    <div class="row2" style="max-width:480px">
+    <div class="row2 keep" style="max-width:480px">
       <label class="field" style="margin:0"><span>Uhrzeit</span><select id="pushHour">${hours.map(h => `<option value="${h}" ${c.hour === h ? 'selected' : ''}>${pad(h)}:00 Uhr</option>`).join('')}</select></label>
       <label class="field" style="margin:0"><span>Vorlauf Termine</span><select id="pushLead">${[3, 7, 14].map(n => `<option value="${n}" ${c.lead === n ? 'selected' : ''}>${n} Tage vorher</option>`).join('')}</select></label>
     </div>
