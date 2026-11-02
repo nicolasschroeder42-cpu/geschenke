@@ -417,6 +417,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
    ========================================================= */
 /* @core-start – die markierten Abschnitte nutzt auch das Erinnerungs-Skript (push-senden.js) */
 const APP = 'geschenke';                 // Präfix für localStorage, Firebase-App-Name und Hauptknoten in der Datenbank
+const APP_VERSION = '2026-11-02 · 4';    // wird in den Einstellungen angezeigt – bei jeder neuen Version hochzählen
 const VAPID_PUBLIC = 'BIdPSh370ZBvqDBzoPnRQJMTcIjat63--7fUNLEffAiwKZ_71G26deCc1hfIEkgNr9jx8--PH3JyNRXK6c4iaUQ';
 const KEY = APP + '.v1';                 // gemeinsame Daten
 const MINEKEY = APP + '.mine';           // private Daten („Meine Geschenke“)
@@ -1373,8 +1374,11 @@ function openSettings(first){
     </div>
     <div class="section"><h3>Sonstiges</h3></div>
     <div class="actions start">
+      <button class="btn" data-action="diag">🔍 Diagnose</button>
       <button class="btn" data-action="reset" style="color:#dc2626">Alles zurücksetzen</button>
-    </div>`}`, sheet => {
+    </div>
+    <div id="diagBox"></div>
+    <p class="muted" style="margin-top:12px;text-align:center">Version ${APP_VERSION}</p>`}`, sheet => {
       sheet.querySelector('#importFile')?.addEventListener('change', importBackup);
       sheet.querySelector('#pplForm')?.addEventListener('submit', ev => {
         ev.preventDefault();
@@ -1489,6 +1493,7 @@ document.addEventListener('click', e => {
     case 'push-on':   pushEnable(); break;
     case 'push-off':  pushDisable(); break;
     case 'push-test': pushTest(); break;
+    case 'diag':      showDiag(); break;
     case 'export': exportBackup(); break;
     case 'import': $('#importFile').click(); break;
     case 'reset':
@@ -1922,6 +1927,31 @@ function pushSectionHTML(){
     </div>`;
 }
 function refreshPushSection(){ const s = $('#pushSection'); if (s) s.innerHTML = pushSectionHTML(); }
+
+// Diagnose: zeigt auf dem Handy, woran Installation oder Benachrichtigungen hängen
+async function showDiag(){
+  const box = $('#diagBox'); if (!box) return;
+  const rows = [], ok = (good, text, hint = '') => rows.push(`<div>${good ? '✅' : '❌'} ${text}${hint ? `<br><small>${hint}</small>` : ''}</div>`);
+  ok(true, `Version ${APP_VERSION}`);
+  ok(location.protocol === 'https:', `Adresse: ${esc(location.origin + location.pathname)}`, location.protocol === 'https:' ? '' : 'Die App muss über die https-Adresse von GitHub geöffnet werden.');
+  ok(matchMedia('(display-mode: standalone)').matches, matchMedia('(display-mode: standalone)').matches ? 'Läuft als installierte App' : 'Läuft im Browser-Tab (nicht als installierte App)');
+  if (!('serviceWorker' in navigator)) ok(false, 'Browser unterstützt keinen Hintergrunddienst');
+  else {
+    const reg = await navigator.serviceWorker.getRegistration().catch(() => null);
+    const st = reg?.active ? 'aktiv' : reg?.installing ? 'wird installiert' : reg?.waiting ? 'wartet' : 'nicht registriert';
+    ok(!!reg?.active, `Hintergrunddienst: ${st}`, reg?.active ? esc('Bereich: ' + reg.scope) : 'App ganz schließen und neu öffnen. Bleibt es so: Fehlen Dateien bei GitHub (z. B. sw.js)?');
+    if (reg?.active && 'PushManager' in window){
+      const sub = await reg.pushManager.getSubscription().catch(() => null);
+      ok(!!sub, sub ? 'Push-Anmeldung vorhanden' : 'Keine Push-Anmeldung', sub ? '' : 'Unter „Erinnerungen“ auf „Einschalten“ tippen.');
+    }
+  }
+  const perm = 'Notification' in window ? Notification.permission : 'nicht unterstützt';
+  ok(perm === 'granted', `Benachrichtigungen: ${({granted: 'erlaubt', denied: 'blockiert', default: 'noch nicht gefragt'})[perm] || perm}`,
+    perm === 'denied' ? 'In Chrome: Schloss/Einstellungen-Symbol neben der Adresse → Benachrichtigungen → Zulassen. Und in Android: Einstellungen → Apps → Chrome → Benachrichtigungen an.' : '');
+  ok(!!sync?.family, sync?.family ? `Familie verbunden (${esc(statusText())})` : 'Nicht mit der Familie verbunden');
+  ok(!!ui.me, ui.me ? `Gerät gehört: ${esc(P(ui.me).name)}` : 'Gerät noch keiner Person zugeordnet');
+  box.innerHTML = `<div class="hint" style="line-height:1.6">${rows.join('')}</div>`;
+}
 async function askPermission(){
   const perm = await Notification.requestPermission();
   if (perm !== 'granted'){ toast('Benachrichtigungen sind für die App nicht erlaubt (Android-Einstellungen prüfen)'); return false; }
