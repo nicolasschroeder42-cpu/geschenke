@@ -261,6 +261,19 @@ main{max-width:1240px;margin:0 auto;padding:12px 16px}
 .opt span{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);font-size:14.5px;font-weight:600;cursor:pointer;user-select:none}
 .opt input:checked+span{border-color:var(--text);background:var(--card);box-shadow:var(--shadow)}
 .opt.who input:checked+span{border-color:transparent;background:var(--grad);color:#fff}
+/* Stand eines Geschenks: gewählter Stand in seiner Farbe gefüllt */
+.opt.stat-idea{--sc:#d97706}.opt.stat-bought{--sc:#10b981}.opt.stat-given{--sc:#8b5cf6}
+.opt[class*=stat-] input:checked+span{background:var(--sc);border-color:var(--sc);color:#fff;box-shadow:0 2px 10px color-mix(in srgb,var(--sc) 35%,transparent)}
+/* Türchen „besorgt“: großer Schalter – grün gefüllt mit Haken, sonst leerer Kreis */
+.done-opt{display:block}
+.done-opt span{justify-content:center;gap:10px;padding:12px 14px;font-size:15.5px;border-style:dashed}
+.done-opt i{width:24px;height:24px;border-radius:50%;border:2.5px solid var(--line);display:grid;place-items:center;font-style:normal;flex:none}
+.done-opt .on{display:none}
+.done-opt input:checked+span{background:#10b981;border:1.5px solid #10b981;color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.35)}
+.done-opt input:checked+span i{background:#fff;border-color:#fff;color:#10b981}
+.done-opt input:checked+span i::before{content:"✓";font-weight:900;font-size:15px}
+.done-opt input:checked+span .on{display:inline}
+.done-opt input:checked+span .off{display:none}
 .icons .opt span{width:44px;height:44px;padding:0;justify-content:center;font-size:22px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:520px){.row2{grid-template-columns:1fr}}
@@ -762,13 +775,13 @@ function renderWichtel(v){
   } else {
     const rd = r => w.rounds?.[r.id];
     if (ui.me){
-      html += `<div class="info-card hl" style="margin-top:0"><span style="font-size:24px">🎁</span><div class="txt">Du beschenkst ${ROUNDS.map(r => `${esc(P(nextIn(r, ui.me)).name)} mit ${esc(lotText(rd(r)))}`).join(' und ')}
-        <small>Du bekommst ${ROUNDS.map(r => `${esc(lotText(rd(r)))} von ${esc(P(prevIn(r, ui.me)).name)}`).join(' und ')}</small></div></div><div style="height:12px"></div>`;
+      html += `<div class="info-card hl" style="margin-top:0"><span style="font-size:24px">🎁</span><div class="txt">Du beschenkst ${ROUNDS.map(r => `${esc(P(nextIn(r, ui.me)).name)} mit „${esc(lotText(rd(r)))}“`).join(' und ')}
+        <small>Du bekommst „${ROUNDS.map(r => `${esc(lotText(rd(r)))}“ von ${esc(P(prevIn(r, ui.me)).name)}`).join(' und „')}</small></div></div><div style="height:12px"></div>`;
     }
     html += `<div class="lots">${ROUNDS.map(r => `<div class="card"><h4>${r.name}</h4>
         <div class="round-what">${rd(r) ? lotWhat(rd(r)) : '–'}</div>
         <div class="chain">${chain(r)}</div>
-        <small class="muted" style="display:block;margin:8px 0 0">${r.order.map(k => `${esc(P(k).name)} → ${esc(P(nextIn(r, k)).name)}`).join(' · ')}</small></div>`).join('')}</div>
+        <small class="muted" style="display:block;margin:8px 0 0;line-height:1.6">${r.order.map(k => `${esc(P(k).name)} → ${esc(P(nextIn(r, k)).name)}`).join('<br>')}</small></div>`).join('')}</div>
       <p class="muted" style="margin:12px 0 8px">${w.drawnAt ? `Gelost am ${esc(new Date(w.drawnAt).toLocaleDateString('de-DE'))}${w.by ? ' von ' + esc(P(w.by).name) : ''}` : 'Von Hand eingetragen'}</p>
       <div class="btnrow"><button class="mini" data-action="lots-edit">✏️ Bearbeiten</button><button class="mini" data-action="draw">🎲 Neu auslosen</button><button class="mini" data-action="pools">⚙️ Farben & Kategorien</button></div>`;
   }
@@ -994,6 +1007,9 @@ function openEntryForm(eid){
            <input class="y" type="number" min="1900" max="2100" placeholder="Jahr" value="${dt.y || ''}" title="Geburtsjahr bzw. „seit“ – optional, für das Alter">`
         : `<span class="calc">📆 ${RULES[dt.rule].name}</span>`}</div></div>`).join('')
     : '<p class="muted">Noch kein Termin – unten auswählen.</p>';
+  // Jeden Vorschlag nur einmal pro Person anbieten (erkannt an Symbol + Regel); „Eigener Termin“ beliebig oft
+  const presetsHTML = () => PRESETS.map((p, i) => p.custom || !draft.dates.some(dt => dt.icon === p.icon && dt.rule === p.rule)
+    ? `<button type="button" class="chipbtn" data-preset="${i}">＋ ${p.icon} ${p.name || p.label}</button>` : '').join('');
 
   openModal(`
     <div class="sheet-head"><h2>${e ? 'Bearbeiten' : 'Neue Person'}</h2><button class="icon-btn" data-action="${e ? 'entry' : 'close'}" data-id="${eid || ''}">✕</button></div>
@@ -1002,7 +1018,7 @@ function openEntryForm(eid){
       <div class="field"><span>Symbol</span><div class="opts icons">${icons.map(i => opt('icon', i, i, draft.icon === i)).join('')}</div></div>
       <div class="field"><span>Jährliche Termine</span>
         <div id="dates">${datesHTML()}</div>
-        <div class="opts presets">${PRESETS.map((p, i) => `<button type="button" class="chipbtn" data-preset="${i}">＋ ${p.icon} ${p.name || p.label}</button>`).join('')}</div>
+        <div class="opts presets" id="presets">${presetsHTML()}</div>
         <small>Muttertag, Vatertag und Ostern berechnet die App jedes Jahr selbst. Mit Jahr (z. B. Geburtsjahr) zeigt sie das Alter an.</small>
       </div>
       <label class="field"><span>Notiz <em>(optional)</em></span><textarea name="note" rows="3" placeholder="Größen, Hobbys, Wünsche, „hat schon“ …">${esc(draft.note)}</textarea></label>
@@ -1019,7 +1035,7 @@ function openEntryForm(eid){
         dt.label = r.querySelector('.lbl').value.trim();
         if (dt.rule === 'fixed'){ dt.d = +r.querySelector('.d').value; dt.m = +r.querySelector('.m').value; dt.y = +r.querySelector('.y').value || null; }
       });
-      const redraw = () => { sheet.querySelector('#dates').innerHTML = datesHTML(); };
+      const redraw = () => { sheet.querySelector('#dates').innerHTML = datesHTML(); sheet.querySelector('#presets').innerHTML = presetsHTML(); };
       form.addEventListener('click', ev => {
         const p = ev.target.closest('[data-preset]'), rm = ev.target.closest('[data-rm]');
         if (p){
@@ -1075,7 +1091,7 @@ function openGiftForm(gid, pre = {}){
       </select></label>
       <div class="field" id="occField"><span>Anlass</span><div class="opts cols2" id="occOpts"></div></div>
       <div class="field"><span>Stand</span><div class="opts cols3">
-        ${Object.entries(STATUS).map(([k, s]) => opt('status', k, `${s.icon} ${s.name}`, g.status === k)).join('')}
+        ${Object.entries(STATUS).map(([k, s]) => opt('status', k, `${s.icon} ${s.name}`, g.status === k, 'stat-' + k)).join('')}
       </div></div>
       <div class="row2 keep">
         <label class="field"><span>Jahr</span><input type="number" name="year" min="1950" max="2100" value="${g.year ?? ''}" placeholder="irgendwann"><small id="yearHint"></small></label>
@@ -1196,7 +1212,7 @@ function openDoor(d){
         <small>Laut Verteilung: ${esc(P(plan).name)}. Zum Tauschen einfach die andere Person wählen.</small></div>
       <label class="field"><span>Was gibt es?</span><input name="text" maxlength="80" value="${esc(doc.text)}" placeholder="z. B. Lieblingsschokolade"></label>
       <div id="simMsg"></div>
-      <div class="field"><label class="opt" style="display:block"><input type="checkbox" name="done" ${doc.done ? 'checked' : ''}><span>✓ Besorgt</span></label></div>
+      <div class="field"><label class="opt done-opt"><input type="checkbox" name="done" ${doc.done ? 'checked' : ''}><span><i></i><b class="off">Noch nicht besorgt</b><b class="on">Besorgt</b></span></label></div>
       ${past.length ? `<div class="hint"><b>Früher an Türchen ${d}</b><div class="past" style="margin-top:6px">${past.map(([k, x]) => `<div><span>${k.slice(0, 4)} · ${esc(P(x.who || adventPlan(+k.slice(0, 4), d)).name)}:</span> ${esc(x.text)}</div>`).join('')}</div></div>` : ''}
       <div class="actions"><button type="button" class="btn" data-action="close">Abbrechen</button><button type="submit" class="btn primary">Speichern</button></div>
     </form>`, sheet => {
