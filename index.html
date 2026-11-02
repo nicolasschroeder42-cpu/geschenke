@@ -1933,7 +1933,7 @@ async function pushEnable(){
   if (!ref) return toast('Gerade keine Verbindung zur Datenbank – bitte gleich nochmal versuchen');
   if (!await askPermission()) return;
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg = await swReady();
     const sub = await reg.pushManager.getSubscription() || await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64uToBytes(VAPID_PUBLIC)});
     pushCfg = {on: true, hour, lead}; lsSet(PUSHKEY, pushCfg);
     await ref.update({sub: sub.toJSON(), person: ui.me, hour, updated: Date.now(), enc: await sealForServer(privateReminders())});
@@ -1942,7 +1942,7 @@ async function pushEnable(){
   } catch(e){ toast('Einschalten fehlgeschlagen: ' + e.message); }
 }
 async function pushDisable(){
-  try { const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(e) {}
+  try { const sub = await (await swReady()).pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(e) {}
   try { await pushRef()?.remove(); } catch(e) {}
   pushCfg.on = false; lsSet(PUSHKEY, pushCfg);
   refreshPushSection(); toast('Erinnerungen ausgeschaltet');
@@ -1955,7 +1955,17 @@ async function pushTest(){
   const priv = privateReminders().sort((a, b) => a.d.localeCompare(b.d))[0];
   if (priv && (!msg || priv.d <= today())) msg = {title: priv.t, body: priv.b};
   msg ||= {title: '🎁 Geschenke', body: 'So sehen Erinnerungen aus. Gerade steht nichts an.'};
-  (await navigator.serviceWorker.ready).showNotification(msg.title, {body: msg.body, icon: 'icon-192.png', badge: 'badge-96.png', tag: 'preview'});
+  try {
+    await (await swReady()).showNotification(msg.title, {body: msg.body, icon: 'icon-192.png', badge: 'badge-96.png', tag: 'preview'});
+    toast('Vorschau verschickt – oben in der Benachrichtigungsleiste');
+  } catch(e){ toast('Vorschau fehlgeschlagen: ' + e.message); }
+}
+// Hintergrunddienst (Service Worker) abwarten – mit Zeitlimit, damit es nie stumm hängen bleibt
+function swReady(){
+  if (!('serviceWorker' in navigator)) return Promise.reject(new Error('Dieser Browser unterstützt keine Benachrichtigungen'));
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  return Promise.race([navigator.serviceWorker.ready,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('Hintergrunddienst startet nicht – App ganz schließen, neu öffnen und nochmal versuchen')), 8000))]);
 }
 
 /* =========================================================

@@ -1,11 +1,12 @@
 // Offline-Unterstützung: App-Dateien und Firebase-Bibliothek werden zwischengespeichert,
 // damit die App auch ohne Internet startet. Daten gleicht die App selbst ab.
-const CACHE = 'geschenke-v2';
+const CACHE = 'geschenke-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, {cache:'reload'})))));
+  // Einzeln zwischenspeichern: Fehlt eine Datei, startet der Service Worker trotzdem (sonst gehen keine Benachrichtigungen)
+  e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(CORE.map(u => c.add(new Request(u, {cache:'reload'}))))));
 });
 
 self.addEventListener('activate', e => {
